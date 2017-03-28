@@ -2,8 +2,6 @@
 #include <iomanip>
 #include <windows.h>
 #include <conio.h>
-#include <string>
-#include <list>
 #include <vector>
 
 using namespace std;
@@ -39,83 +37,15 @@ public:
   }
 };
 
-void drawSymbol (CARDS card) {
-  SetConsoleOutputCP(CP_UTF8);
-  wchar_t s[2];
-  switch (card) {
-    case KIER:
-      s[0] = L'♥';
-      break;
-    case KARO:
-      s[0] = L'♦';
-      break;
-    case PIK:
-      s[0] = L'♠';
-      break;
-    case TREFL:
-      s[0] = L'♣';
-      break;
-  }
-  s[1] = '\0';
-  int bufferSize = WideCharToMultiByte(CP_UTF8, 0, s, -1, NULL, 0, NULL, NULL);
-  char* m = new char[bufferSize];
-  WideCharToMultiByte(CP_UTF8, 0, s, -1, m, bufferSize, NULL, NULL);
-  wprintf(L"%S", m);
-  SetConsoleOutputCP(869);
-}
-
-
-char getValueChar (unsigned short int value) {
-  switch (value) {
-    case 1:
-      return 'A';
-    case 11:
-      return 'J';
-    case 12:
-      return 'Q';
-    case 13:
-      return 'K';
-    default:
-      return static_cast<char>(value) + '0';
-  }
-}
-
-
-char mark (unsigned short int x, unsigned short int y, unsigned short int pos_x, unsigned short int pos_y, unsigned short int pos_x_marked, unsigned short int pos_y_marked, bool marked) {
-  if (x == pos_x && y == pos_y) {
-    if (marked) {
-      if (pos_x == pos_x_marked && pos_y == pos_y_marked) {
-        return static_cast<char>(178);
-      } else {
-        return static_cast<char>(176);
-      }
-    } else {
-      return static_cast<char>(176);
-    }
-  } else {
-    if (marked && x == pos_x_marked && y == pos_y_marked) {
-      return static_cast<char>(177);
-    } else {
-      return ' ';
-    }
-  }
-}
-
-
-class graphics_t {
-public:
-  void init () {
-    HWND console = GetConsoleWindow();
-    RECT r;
-    GetWindowRect(console, &r); //stores the console's current dimensions
-
-    //MoveWindow(window_handle, x, y, width, height, redraw_window);
-    MoveWindow(console, r.left, r.top, 800, 600, TRUE);
-  }
-};
 
 class game_t {
 public:
+  unsigned short int cursor_x = 0;
+  unsigned short int cursor_y = 0;
+  unsigned short int cursor_marked_x = 0;
+  unsigned short int cursor_marked_y = 0;
+  bool cursor_marked = false;
+
   vector<card_t> board[8];
   card_t target[4];
   card_t aux[4];    // auxiliary
@@ -142,7 +72,123 @@ public:
     exampleCard.setValue(10);
     board[2].push_back(exampleCard);
   }
-  void draw (unsigned short int x, unsigned short int y, unsigned short int x_marked, unsigned short int y_marked, bool marked) {
+
+  void loop () {
+    char c = getch();
+    switch (c) {
+      case 'w':
+        cursor_y--;
+        break;
+      case 's':
+        cursor_y++;
+        break;
+      case 'a':
+        cursor_x--;
+        break;
+      case 'd':
+        cursor_x++;
+        break;
+      case ' ':
+      if (cursor_marked && cursor_x == cursor_marked_x && cursor_y == cursor_marked_y) {
+        cursor_marked = false;
+      } else {
+        cursor_marked = true;
+        cursor_marked_x = cursor_x;
+        cursor_marked_y = cursor_y;
+      }
+        break;
+    }
+    system("cls");
+
+  }
+};
+
+
+class graphics_t {
+private:
+  game_t* game;
+  char mark (unsigned short int x, unsigned short int y) {
+    unsigned short int pos_x = game->cursor_x;
+    unsigned short int pos_y = game->cursor_y;
+    unsigned short int pos_x_marked = game->cursor_marked_x;
+    unsigned short int pos_y_marked = game->cursor_marked_y;
+    bool marked = game->cursor_marked;
+
+
+    if (x == pos_x && y == pos_y) {
+      if (marked) {
+        if (pos_x == pos_x_marked && pos_y == pos_y_marked) {
+          return static_cast<char>(178);
+        } else {
+          return static_cast<char>(176);
+        }
+      } else {
+        return static_cast<char>(176);
+      }
+    } else {
+      if (marked && x == pos_x_marked && y == pos_y_marked) {
+        return static_cast<char>(177);
+      } else {
+        return ' ';
+      }
+    }
+  }
+  void drawSymbol (CARDS card) {
+    SetConsoleOutputCP(CP_UTF8);
+    wchar_t s[2];
+    switch (card) {
+      case KIER:
+        s[0] = L'♥';
+        break;
+      case KARO:
+        s[0] = L'♦';
+        break;
+      case PIK:
+        s[0] = L'♠';
+        break;
+      case TREFL:
+        s[0] = L'♣';
+        break;
+    }
+    s[1] = '\0';
+    int bufferSize = WideCharToMultiByte(CP_UTF8, 0, s, -1, NULL, 0, NULL, NULL);
+    char* m = new char[bufferSize];
+    WideCharToMultiByte(CP_UTF8, 0, s, -1, m, bufferSize, NULL, NULL);
+    wprintf(L"%S", m);
+    SetConsoleOutputCP(869);
+  }
+  char getValueChar (unsigned short int value) {
+    switch (value) {
+      case 1:
+        return 'A';
+      case 11:
+        return 'J';
+      case 12:
+        return 'Q';
+      case 13:
+        return 'K';
+      default:
+        return static_cast<char>(value) + '0';
+    }
+  }
+public:
+  void init (game_t* _game) {
+    game = _game;
+    HWND console = GetConsoleWindow();
+    RECT r;
+    GetWindowRect(console, &r); //stores the console's current dimensions
+
+    //MoveWindow(window_handle, x, y, width, height, redraw_window);
+    MoveWindow(console, r.left, r.top, 800, 600, TRUE);
+    // cout << "graphics Init " << _game->board[1][1].getType() << endl;
+  }
+  void draw () {
+    unsigned short int x = game->cursor_x;
+    unsigned short int y = game->cursor_y;
+    unsigned short int x_marked = game->cursor_marked_x;
+    unsigned short int y_marked = game->cursor_marked_y;
+    bool marked = game->cursor_marked;
+
     for (size_t i = 0; i < 8; i++) {
       cout << static_cast<char>(201);
       for (size_t k = 0; k < 9; k++) {
@@ -155,11 +201,11 @@ public:
     for (size_t j = 0; j < 8; j++) {
       cout << static_cast<char>(186);
       for (size_t k = 0; k < 3; k++) {
-        cout << static_cast<char>(mark(j, 0, x, y, x_marked, y_marked, marked));
+        cout << static_cast<char>(mark(j, 0));
       }
       cout << "XXX";
       for (size_t k = 0; k < 3; k++) {
-        cout << static_cast<char>(mark(j, 0, x, y, x_marked, y_marked, marked));
+        cout << static_cast<char>(mark(j, 0));
       }
       cout << static_cast<char>(186);
     }
@@ -169,7 +215,7 @@ public:
       for (size_t j = 0; j < 8; j++) {
         cout << static_cast<char>(186);
         for (size_t k = 0; k < 9; k++) {
-          cout << static_cast<char>(mark(j, 0, x, y, x_marked, y_marked, marked));
+          cout << static_cast<char>(mark(j, 0));
         }
         cout << static_cast<char>(186);
       }
@@ -193,7 +239,7 @@ public:
       endDrawing = true;
 
       for (size_t j = 0; j < 8; j++) {
-        if (board[j].size() > i) {
+        if (game->board[j].size() > i) {
           endDrawing = false;
           cout << static_cast<char>(201);
           for (size_t k = 0; k < 9; k++) {
@@ -201,12 +247,12 @@ public:
           }
           cout << static_cast<char>(187);
         } else {
-          if (i - 2 <= board[j].size()) {
+          if (i - 2 <= game->board[j].size()) {
             endDrawing = false;
-            if (i - 2 < board[j].size()) {
+            if (i - 2 < game->board[j].size()) {
               cout << static_cast<char>(186);
               for (size_t k = 0; k < 9; k++) {
-                cout << static_cast<char>(mark(j, i, x, y, x_marked, y_marked, marked));
+                cout << static_cast<char>(mark(j, i));
               }
               cout << static_cast<char>(186);
             }else{
@@ -225,23 +271,23 @@ public:
       cout << endl;
 
       for (size_t j = 0; j < 8; j++) {
-        if (board[j].size() > i) {
+        if (game->board[j].size() > i) {
           endDrawing = false;
           cout << static_cast<char>(186);
           for (size_t k = 0; k < 3; k++) {
-            cout << static_cast<char>(mark(j, i + 1, x, y, x_marked, y_marked, marked));
+            cout << static_cast<char>(mark(j, i + 1));
           }
-          if (board[j][i].getValue() == 10)
+          if (game->board[j][i].getValue() == 10)
             cout << setw(2) << 10;
           else
-            cout << setw(2) << getValueChar(board[j][i].getValue());
-          drawSymbol(board[j][i].getType());
+            cout << setw(2) << getValueChar(game->board[j][i].getValue());
+          drawSymbol(game->board[j][i].getType());
           for (size_t k = 0; k < 3; k++) {
-            cout << static_cast<char>(mark(j, i + 1, x, y, x_marked, y_marked, marked));
+            cout << static_cast<char>(mark(j, i + 1));
           }
           cout << static_cast<char>(186);
         } else {
-          if (i - 2 < board[j].size()) {
+          if (i - 2 < game->board[j].size()) {
             endDrawing = false;
             cout << static_cast<char>(186) << "         " << static_cast<char>(186);
           }else{
@@ -252,9 +298,6 @@ public:
       cout << endl;
     }
   }
-  void loop () {
-
-  }
 };
 
 
@@ -263,45 +306,13 @@ int main(int argc, char const *argv[]) {
   graphics_t graphics;
 
   game.init();
-  graphics.init();
+  graphics.init(&game);
 
-  unsigned short int x = 0;
-  unsigned short int y = 0;
-  unsigned short int x_marked = 0;
-  unsigned short int y_marked = 0;
-  bool marked = false;
-  char c;
-  game.draw(x, y, x_marked, y_marked, marked);
+  graphics.draw();
   while (1) {
-    c = getch();
-    switch (c) {
-      case 'w':
-        y--;
-        break;
-      case 's':
-        y++;
-        break;
-      case 'a':
-        x--;
-        break;
-      case 'd':
-        x++;
-        break;
-      case ' ':
-      if (marked && x == x_marked && y == y_marked) {
-        marked = false;
-      } else {
-        marked = true;
-        x_marked = x;
-        y_marked = y;
-      }
-        break;
-    }
-    system("cls");
-    game.draw(x, y, x_marked, y_marked, marked);
+    game.loop();
+    graphics.draw();
   }
-
-
 
   return 0;
 }
