@@ -101,11 +101,47 @@ char mark (unsigned short int x, unsigned short int y, unsigned short int pos_x,
   }
 }
 
+
+class graphics_t {
+public:
+  void init () {
+    HWND console = GetConsoleWindow();
+    RECT r;
+    GetWindowRect(console, &r); //stores the console's current dimensions
+
+    //MoveWindow(window_handle, x, y, width, height, redraw_window);
+    MoveWindow(console, r.left, r.top, 800, 600, TRUE);
+  }
+};
+
 class game_t {
 public:
   vector<card_t> board[8];
   card_t target[4];
   card_t aux[4];    // auxiliary
+
+  void init () {
+    // **testing set**
+    card_t exampleCard;
+    for (size_t i = 0; i < 4; i++) {
+      exampleCard.setType(static_cast<CARDS>(i+1));
+      for (size_t j = 7; j > 0; j--) {
+        exampleCard.setValue(j);
+        board[i].push_back(exampleCard);
+      }
+    }
+    for (size_t i = 4; i < 8; i++) {
+      exampleCard.setType(static_cast<CARDS>(i-3));
+      for (size_t j = 13; j > 7; j--) {
+        exampleCard.setValue(j);
+        board[i].push_back(exampleCard);
+      }
+    }
+
+    exampleCard.setType(PIK);
+    exampleCard.setValue(10);
+    board[2].push_back(exampleCard);
+  }
   void draw (unsigned short int x, unsigned short int y, unsigned short int x_marked, unsigned short int y_marked, bool marked) {
     for (size_t i = 0; i < 8; i++) {
       cout << static_cast<char>(201);
@@ -216,42 +252,18 @@ public:
       cout << endl;
     }
   }
+  void loop () {
+
+  }
 };
 
 
 int main(int argc, char const *argv[]) {
-  HWND console = GetConsoleWindow();
-  RECT r;
-  GetWindowRect(console, &r); //stores the console's current dimensions
-
-  //MoveWindow(window_handle, x, y, width, height, redraw_window);
-  MoveWindow(console, r.left, r.top, 800, 600, TRUE);
   game_t game;
+  graphics_t graphics;
 
-
-  // **testing set**
-  card_t exampleCard;
-  for (size_t i = 0; i < 4; i++) {
-    exampleCard.setType(static_cast<CARDS>(i+1));
-    for (size_t j = 7; j > 0; j--) {
-      exampleCard.setValue(j);
-      game.board[i].push_back(exampleCard);
-    }
-  }
-  for (size_t i = 4; i < 8; i++) {
-    exampleCard.setType(static_cast<CARDS>(i-3));
-    for (size_t j = 13; j > 7; j--) {
-      exampleCard.setValue(j);
-      game.board[i].push_back(exampleCard);
-    }
-  }
-
-  exampleCard.setType(PIK);
-  exampleCard.setValue(10);
-  game.board[2].push_back(exampleCard);
-  // *****************
-  // game.draw();
-
+  game.init();
+  graphics.init();
 
   unsigned short int x = 0;
   unsigned short int y = 0;
