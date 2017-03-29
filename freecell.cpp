@@ -98,7 +98,7 @@ public:
       }
         break;
     }
-    system("cls");
+    // system("cls");
 
   }
 };
@@ -175,12 +175,25 @@ public:
   void init (game_t* _game) {
     game = _game;
     HWND console = GetConsoleWindow();
+    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_CURSOR_INFO cursorInfo;
     RECT r;
-    GetWindowRect(console, &r); //stores the console's current dimensions
 
+    GetWindowRect(console, &r); //stores the console's current dimensions
     //MoveWindow(window_handle, x, y, width, height, redraw_window);
     MoveWindow(console, r.left, r.top, 800, 600, TRUE);
     // cout << "graphics Init " << _game->board[1][1].getType() << endl;
+
+    GetConsoleCursorInfo(out, &cursorInfo);
+    cursorInfo.bVisible = false; // set the cursor visibility
+    SetConsoleCursorInfo(out, &cursorInfo);
+  }
+  void goToStart() {
+    HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+    COORD CursorPosition;
+    CursorPosition.X = 0;
+    CursorPosition.Y = 0;
+    SetConsoleCursorPosition(console,CursorPosition);
   }
   void draw () {
     unsigned short int x = game->cursor_x;
@@ -188,6 +201,8 @@ public:
     unsigned short int x_marked = game->cursor_marked_x;
     unsigned short int y_marked = game->cursor_marked_y;
     bool marked = game->cursor_marked;
+
+    goToStart();
 
     for (size_t i = 0; i < 8; i++) {
       cout << static_cast<char>(201);
