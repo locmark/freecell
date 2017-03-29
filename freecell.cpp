@@ -4,8 +4,8 @@
 #include <conio.h>
 #include <vector>
 
-using namespace std;
 
+using namespace std;
 
 enum CARDS {
   KIER = 1,
@@ -20,7 +20,8 @@ enum COLORS {
 };
 
 
-class card_t {
+class card_t 
+{
 private:
   CARDS type;
   unsigned short int value;
@@ -30,15 +31,16 @@ public:
   unsigned short int getValue () {return value;}
   void setType (CARDS _type) {type = _type;}
   void setValue (unsigned short int _value) {value = _value;}
-  card () {}
-  card (CARDS _type, unsigned short int _value) {
+  card_t () {}
+  card_t (CARDS _type, unsigned short int _value) {
     type = _type;
     value = _value;
   }
 };
 
 
-class game_t {
+class game_t 
+{		
 public:
   unsigned short int cursor_x = 0;
   unsigned short int cursor_y = 0;
@@ -50,32 +52,55 @@ public:
   card_t target[4];
   card_t aux[4];    // auxiliary
 
-  void init () {
-    // **testing set**
+  void init ()     // **testing set**
+  {
+  	for(size_t i = 0; i < 4; i++) //clear cells
+  	{
+  		target[i].setValue(0);
+  		aux[i].setValue(0);
+	  }
     card_t exampleCard;
-    for (size_t i = 0; i < 4; i++) {
+    for (size_t i = 0; i < 4; i++) 
+	{
       exampleCard.setType(static_cast<CARDS>(i+1));
-      for (size_t j = 7; j > 0; j--) {
+      for (size_t j = 7; j > 0; j--) 
+	  {
         exampleCard.setValue(j);
         board[i].push_back(exampleCard);
       }
     }
-    for (size_t i = 4; i < 8; i++) {
+    for (size_t i = 4; i < 8; i++) 
+	{
       exampleCard.setType(static_cast<CARDS>(i-3));
-      for (size_t j = 13; j > 7; j--) {
+      for (size_t j = 13; j > 7; j--) 
+	  {
         exampleCard.setValue(j);
         board[i].push_back(exampleCard);
       }
     }
-
-    exampleCard.setType(PIK);
-    exampleCard.setValue(10);
-    board[2].push_back(exampleCard);
+  }  
+  
+  void moves ()
+  { 
+  	if((cursor_x < 4) && (cursor_y == 0))  //auxiliary cases
+	{
+  		if(aux[cursor_x].getValue() == 0)
+  		{
+  			aux[cursor_x] = board[cursor_marked_x][cursor_marked_y - 1];
+  			board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);
+  			cout<<"Debug_aux="<<aux[cursor_x].getValue();
+		}
+	}
+	//else if((cursor_x >= 4) && (cursor_x < 7) && (cursor_y == 0)){} //target cases
+  	
   }
+  
+  
 
-  void loop () {
-    char c = getch();
-    switch (c) {
+  void loop () 
+  {
+    switch (getch()) 
+	{
       case 'w':
         cursor_y--;
         break;
@@ -89,12 +114,22 @@ public:
         cursor_x++;
         break;
       case ' ':
-      if (cursor_marked && cursor_x == cursor_marked_x && cursor_y == cursor_marked_y) {
-        cursor_marked = false;
-      } else {
-        cursor_marked = true;
+      	
+      if(!cursor_marked)
+	  {
+	  	cursor_marked = true;
         cursor_marked_x = cursor_x;
         cursor_marked_y = cursor_y;
+      }
+      else if(cursor_marked && (cursor_x != cursor_marked_x || cursor_y != cursor_marked_y))
+      {
+      	moves();
+      	cursor_marked = false;
+	  }
+		  
+      else if (cursor_marked && cursor_x == cursor_marked_x && cursor_y == cursor_marked_y) 
+	  {
+        cursor_marked = false;
       }
         break;
     }
@@ -138,16 +173,16 @@ private:
     wchar_t s[2];
     switch (card) {
       case KIER:
-        s[0] = L'♥';
+        s[0] = 'H'; //poprawilem na dzialajace u mnie oznaczenia, potem mozemy wrocic do jakichs ladniejszych
         break;
       case KARO:
-        s[0] = L'♦';
+        s[0] = 'D';
         break;
       case PIK:
-        s[0] = L'♠';
+        s[0] = 'S';
         break;
       case TREFL:
-        s[0] = L'♣';
+        s[0] = 'C';
         break;
     }
     s[1] = '\0';
@@ -204,29 +239,41 @@ public:
 
     goToStart();
 
-    for (size_t i = 0; i < 8; i++) {
+    for (size_t i = 0; i < 8; i++) 
+	{
       cout << static_cast<char>(201);
-      for (size_t k = 0; k < 9; k++) {
+      for (size_t k = 0; k < 9; k++) 
+	  {
         cout << static_cast<char>(205);
       }
       cout << static_cast<char>(187);
     }
     cout << endl;
 
-    for (size_t j = 0; j < 8; j++) {
+    for (size_t j = 0; j < 8; j++) 
+	{
       cout << static_cast<char>(186);
-      for (size_t k = 0; k < 3; k++) {
-        cout << static_cast<char>(mark(j, 0));
+      for (size_t k = 0; k < 3; k++) 
+	  {
+	  	cout << mark(j, 0);
       }
-      cout << "XXX";
-      for (size_t k = 0; k < 3; k++) {
-        cout << static_cast<char>(mark(j, 0));
+      if(game->aux[j].getValue() != 0)
+      {
+      	cout << setw(2) << getValueChar(game->aux[j].getValue());
+      	drawSymbol(game->aux[j].getType());
+      }
+      else cout<<"XXX";
+      for (size_t k = 0; k < 3; k++) 
+	  {
+        cout << mark(j, 0);
       }
       cout << static_cast<char>(186);
     }
     cout << endl;
 
-    for (size_t i = 0; i < 4; i++) {
+    for (size_t i = 0; i < 4; i++)
+	 {
+    	
       for (size_t j = 0; j < 8; j++) {
         cout << static_cast<char>(186);
         for (size_t k = 0; k < 9; k++) {
@@ -326,6 +373,7 @@ int main(int argc, char const *argv[]) {
   graphics.draw();
   while (1) {
     game.loop();
+
     graphics.draw();
   }
 
