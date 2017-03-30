@@ -39,6 +39,41 @@ public:
 
 
 class game_t {
+private:
+	void makeMove () {
+		if ((cursor_x < 4) && (cursor_y == 0)) { //sth->aux cases
+			if((cursor_marked_x < 4) && (cursor_marked_y == 0)) { //aux->aux case
+				if(aux[cursor_x].getValue() == 0) {
+					aux[cursor_x] = aux[cursor_marked_x];
+					aux[cursor_marked_x].setValue(0);
+				} //else message NOT FREE	
+			}
+			if(cursor_marked_y > 0) { //board->aux case
+				if(aux[cursor_x].getValue() == 0) {
+					aux[cursor_x] = board[cursor_marked_x][cursor_marked_y - 1];
+					board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);
+				} //else message NOT FREE				
+			}
+		}
+		if((cursor_x >= 4) && (cursor_y == 0)) { //sth->target cases
+			if((cursor_marked_x < 4) && (cursor_marked_y == 0)) { //aux->target case
+				if(((target[cursor_x - 4].getValue() == 0) && (aux[cursor_marked_x].getValue() == 1)) || ((target[cursor_x - 4].getValue() == (aux[cursor_marked_x].getValue() - 1)) && (target[cursor_x - 4].getType() == aux[cursor_marked_x].getType()))) { //what the fuck?
+					target[cursor_x - 4] = aux[cursor_marked_x];
+					aux[cursor_marked_x].setValue(0);
+				} //else message NOT POSSIBLE
+			}
+			if(cursor_marked_y > 0) { //board->target case
+				if((board[cursor_marked_x].size() == cursor_marked_y) && (((target[cursor_x - 4].getValue() == 0) && (board[cursor_marked_x][cursor_marked_y - 1].getValue() == 1)) || ((target[cursor_x - 4].getValue() == (board[cursor_marked_x][cursor_marked_y - 1].getValue() - 1)) && (target[cursor_x - 4].getType() == board[cursor_marked_x][cursor_marked_y - 1].getType())))) { //whaaat the fuck?
+					target[cursor_x - 4] = board[cursor_marked_x][cursor_marked_y - 1];
+					board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);
+				} //else message NOT POSSIBLE				
+			}
+		}		
+  	}
+
+
+
+	
 public:
   unsigned short int cursor_x = 0;
   unsigned short int cursor_y = 0;
@@ -72,19 +107,6 @@ public:
       }
     }
   }
-
-
-  void moves () {
-  	if ((cursor_x < 4) && (cursor_y == 0)) { //auxiliary cases
-  		if (aux[cursor_x].getValue() == 0) {
-  			aux[cursor_x] = board[cursor_marked_x][cursor_marked_y - 1];
-  			board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);
-  			cout << "Debug_aux=" << aux[cursor_x].getValue();
-  		}
-  	}
-  	//else if((cursor_x >= 4) && (cursor_x < 7) && (cursor_y == 0)){} //target cases
-  }
-
 
   void loop () {
     switch (getch()) {
@@ -120,7 +142,7 @@ public:
           cursor_marked_x = cursor_x;
           cursor_marked_y = cursor_y;
         } else if(cursor_marked && (cursor_x != cursor_marked_x || cursor_y != cursor_marked_y)) {
-        	moves();
+        	makeMove();
         	cursor_marked = false;
     	  } else if (cursor_marked && cursor_x == cursor_marked_x && cursor_y == cursor_marked_y) {
           cursor_marked = false;
@@ -250,7 +272,7 @@ public:
     }
     cout << endl;
 
-    for (size_t j = 0; j < 8; j++) {
+    for (size_t j = 0; j < 4; j++) {
       cout << static_cast<char>(186);
       for (size_t k = 0; k < 3; k++) {
   	  	cout << mark(j, 0);
@@ -258,6 +280,21 @@ public:
       if(game->aux[j].getValue() != 0) {
       	cout << setw(2) << getValueChar(game->aux[j].getValue());
       	drawSymbol(game->aux[j].getType());
+      }
+      else cout<<"XXX";
+      for (size_t k = 0; k < 3; k++) {
+        cout << mark(j, 0);
+      }
+      cout << static_cast<char>(186);
+    }
+    for (size_t j = 4; j < 8; j++) {
+      cout << static_cast<char>(186);
+      for (size_t k = 0; k < 3; k++) {
+  	  	cout << mark(j, 0);
+      }
+      if(game->target[j-4].getValue() != 0) {
+      	cout << setw(2) << getValueChar(game->target[j-4].getValue());
+      	drawSymbol(game->target[j-4].getType());
       }
       else cout<<"XXX";
       for (size_t k = 0; k < 3; k++) {
