@@ -54,16 +54,6 @@ private:
 		}
 		return count;
 	}
-	bool isInOrder(unsigned short which, unsigned short from, unsigned short to) {
-		if(from == to) 
-			return true;
-		for(size_t i = from; i < to; i++) {
-			if((board[which][i].getValue() != (board[which][i+1].getValue() - 1)) && (board[which][i].getType() == board[which][i+1].getType())) {
-				return false;
-			}
-			return true;
-		}	
-	}
 	void makeMove () {
 		if(cursor_y == 0) { //sth->aux or sth->target cases DONE
 			if (cursor_x < 4) { //sth->aux cases 
@@ -103,9 +93,9 @@ private:
 				}
 			}
 			if(cursor_marked_y > 0) { //board->board case
-				if((board[cursor_x].size() == 0) || (board[cursor_x].size() == cursor_y)) { //has to be put on top
+				if((board[cursor_x].size() == 0) || (board[cursor_x].size() == cursor_y)) { //has to be put on top or empty
 					//cout<<"Top checked"<<endl;
-					if((board[cursor_x][cursor_y - 1].getValue() == (board[cursor_marked_x][cursor_marked_y - 1].getValue() + 1)) && (board[cursor_x][cursor_y - 1].getType() != (board[cursor_marked_x][cursor_marked_y - 1].getType()))) {
+					if((board[cursor_x].size() == 0) || (board[cursor_x][cursor_y - 1].getValue() == (board[cursor_marked_x][cursor_marked_y - 1].getValue() + 1)) && (board[cursor_x][cursor_y - 1].getType() != (board[cursor_marked_x][cursor_marked_y - 1].getType()))) {
 						//cout<<"Colour checked"<<endl;
 						if(isInOrder(cursor_marked_x, cursor_marked_y - 1, board[cursor_marked_x].size() - 1) && (countFreeCells() >= (board[cursor_marked_x].size() - cursor_marked_y))) {
 							//cout<<"Freecells and order checked"<<endl;
@@ -129,7 +119,17 @@ public:
   vector<card_t> board[8];
   card_t target[4];
   card_t aux[4];    // auxiliary
-
+  
+  bool isInOrder(unsigned short which, unsigned short from, unsigned short to) {
+		if((from == to) || (to == from + 1)) 
+			return true;
+		for(size_t i = from; i < to; i++) {
+			if((board[which][i].getValue() != (board[which][i+1].getValue() - 1)) && (board[which][i].getType() == board[which][i+1].getType())) {
+				return false;
+			}
+			return true;
+		}	
+	}
 
   void init () {    // **testing set**
   	for(size_t i = 0; i < 4; i++) { //clear cells
@@ -154,6 +154,14 @@ public:
 
     // board[3].erase (board[3].begin(), board[3].begin() + 7);
   }
+  
+  bool checkIfWin() {
+  	bool won = true;
+  	for(size_t i = 0; i < 8; i++) {
+  		won = isInOrder(i, 0, board[i].size()) && won;
+	  }
+	  return won || (target[0].getValue() == 13 && target[1].getValue() == 13 && target[2].getValue() == 13 && target[3].getValue() == 13);
+	}
 
 
   void loop () {
@@ -194,13 +202,22 @@ public:
         break;
       case ' ':
         if (!cursor_marked) {
-    	  	cursor_marked = true;
-          cursor_marked_x = cursor_x;
-          cursor_marked_y = cursor_y;
-        } else if(cursor_marked && (cursor_x != cursor_marked_x || cursor_y != cursor_marked_y)) {
+			cursor_marked = true;
+          	cursor_marked_x = cursor_x;
+          	cursor_marked_y = cursor_y;
+        } 
+		else if(cursor_marked && (cursor_x != cursor_marked_x || cursor_y != cursor_marked_y)) {
         	makeMove();
+        	if(checkIfWin() == true)
+        	{
+        		system("CLS");
+        		cout<<"YOU WON!!!"<<endl;
+        		system("PAUSE");
+        		exit(0);
+			}
         	cursor_marked = false;
-    	  } else if (cursor_marked && cursor_x == cursor_marked_x && cursor_y == cursor_marked_y) {
+    	  } 
+		  else if (cursor_marked && cursor_x == cursor_marked_x && cursor_y == cursor_marked_y) {
           cursor_marked = false;
         }
         break;
@@ -512,7 +529,7 @@ public:
 };
 
 
-int main(int argc, char const *argv[]) {
+int main(int argc, const char **argv) {
   game_t game;
   graphics_t graphics;
 
