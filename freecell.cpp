@@ -72,8 +72,6 @@ private:
 	}
 
 
-
-
 public:
   unsigned short int cursor_x = 0;
   unsigned short int cursor_y = 0;
@@ -110,6 +108,7 @@ public:
     board[3].erase (board[3].begin(), board[3].begin() + 7);
   }
 
+
   void loop () {
     switch (getch()) {
       case 'w':
@@ -118,22 +117,30 @@ public:
         }
         break;
       case 's':
-        if (cursor_y < board[cursor_x].size()) {
+        if (cursor_y < board[cursor_x].size() || (board[cursor_x].size() == 0 && cursor_y == 0)) {
           cursor_y++;
         }
         break;
       case 'a':
         if (cursor_x > 0) {
-          if (cursor_y != 0 && cursor_y > board[cursor_x - 1].size() && board[cursor_x - 1].size() != 0) {
-            cursor_y = board[cursor_x - 1].size();
+          if (cursor_y != 0 && cursor_y > board[cursor_x - 1].size()) {
+            if (board[cursor_x - 1].size() == 0) {
+              cursor_y = 1;
+            } else {
+              cursor_y = board[cursor_x - 1].size();
+            }
           }
           cursor_x--;
         }
         break;
       case 'd':
         if (cursor_x < 7) {
-          if (cursor_y != 0 && cursor_y > board[cursor_x + 1].size() && board[cursor_x + 1].size() != 0) {
-            cursor_y = board[cursor_x + 1].size();
+          if (cursor_y != 0 && cursor_y > board[cursor_x + 1].size()) {
+            if (board[cursor_x + 1].size() == 0) {
+              cursor_y = 1;
+            } else {
+              cursor_y = board[cursor_x + 1].size();
+            }
           }
           cursor_x++;
         }
