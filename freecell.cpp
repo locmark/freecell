@@ -265,23 +265,56 @@ private:
 
 
   void draw_card_content (unsigned short int x, unsigned short int y) {
-    // if (y == 0) {
-    //
-    // } else {
-      cout << static_cast<char>(186);
+    cout << static_cast<char>(186);
+
+    if (y == 0) {
       for (size_t k = 0; k < 3; k++) {
-        cout << static_cast<char>(mark(x, y + 1));
+        cout << mark(x, 0);
       }
-      if (game->board[x][y].getValue() == 10)
+
+      if (x < 4) {
+        if(game->aux[x].getValue() != 0) {
+          if (game->aux[x].getValue() == 10)
+            cout << setw(2) << 10;
+          else
+          	cout << setw(2) << getValueChar(game->aux[x].getValue());
+        	drawSymbol(game->aux[x].getType());
+        } else {
+          for (size_t k = 0; k < 3; k++) {
+            cout << mark(x, 0);
+          }
+        }
+      } else {
+        if(game->target[x-4].getValue() != 0) {
+          if (game->target[x-4].getValue() == 10)
+            cout << setw(2) << 10;
+          else
+        	cout << setw(2) << getValueChar(game->target[x-4].getValue());
+        	drawSymbol(game->target[x-4].getType());
+        } else {
+          for (size_t k = 0; k < 3; k++) {
+            cout << mark(x, 0);
+          }
+        }
+      }
+
+      for (size_t k = 0; k < 3; k++) {
+        cout << mark(x, 0);
+      }
+    } else {
+      for (size_t k = 0; k < 3; k++) {
+        cout << static_cast<char>(mark(x, y));
+      }
+      if (game->board[x][y-1].getValue() == 10)
         cout << setw(2) << 10;
       else
-        cout << setw(2) << getValueChar(game->board[x][y].getValue());
-      drawSymbol(game->board[x][y].getType());
+        cout << setw(2) << getValueChar(game->board[x][y - 1].getValue());
+      drawSymbol(game->board[x][y - 1].getType());
       for (size_t k = 0; k < 3; k++) {
-        cout << static_cast<char>(mark(x, y + 1));
+        cout << static_cast<char>(mark(x, y));
       }
-      cout << static_cast<char>(186);
-    // }
+    }
+    cout << static_cast<char>(186);
 
   }
 
@@ -293,36 +326,8 @@ private:
 
     cout << endl;
 
-    for (size_t j = 0; j < 4; j++) {
-      cout << static_cast<char>(186);
-      for (size_t k = 0; k < 3; k++) {
-  	  	cout << mark(j, 0);
-      }
-      if(game->aux[j].getValue() != 0) {
-      	cout << setw(2) << getValueChar(game->aux[j].getValue());
-      	drawSymbol(game->aux[j].getType());
-      }
-      else cout<<"XXX";
-      for (size_t k = 0; k < 3; k++) {
-        cout << mark(j, 0);
-      }
-      cout << static_cast<char>(186);
-    }
-
-    for (size_t j = 4; j < 8; j++) {
-      cout << static_cast<char>(186);
-      for (size_t k = 0; k < 3; k++) {
-  	  	cout << mark(j, 0);
-      }
-      if(game->target[j-4].getValue() != 0) {
-      	cout << setw(2) << getValueChar(game->target[j-4].getValue());
-      	drawSymbol(game->target[j-4].getType());
-      }
-      else cout<<"XXX";
-      for (size_t k = 0; k < 3; k++) {
-        cout << mark(j, 0);
-      }
-      cout << static_cast<char>(186);
+    for (size_t j = 0; j < 8; j++) {
+      draw_card_content(j, 0);
     }
 
     cout << endl;
@@ -436,7 +441,7 @@ public:
         } else {
           if (game->board[j].size() > i) {
             endDrawing = false;
-            draw_card_content(j, i);
+            draw_card_content(j, i + 1);
           } else {
             if (i - 2 < game->board[j].size()) {
               endDrawing = false;
