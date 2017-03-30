@@ -20,8 +20,7 @@ enum COLORS {
 };
 
 
-class card_t 
-{
+class card_t {
 private:
   CARDS type;
   unsigned short int value;
@@ -39,8 +38,7 @@ public:
 };
 
 
-class game_t 
-{		
+class game_t {
 public:
   unsigned short int cursor_x = 0;
   unsigned short int cursor_y = 0;
@@ -52,55 +50,44 @@ public:
   card_t target[4];
   card_t aux[4];    // auxiliary
 
-  void init ()     // **testing set**
-  {
-  	for(size_t i = 0; i < 4; i++) //clear cells
-  	{
+
+  void init () {    // **testing set**
+  	for(size_t i = 0; i < 4; i++) { //clear cells
   		target[i].setValue(0);
   		aux[i].setValue(0);
 	  }
     card_t exampleCard;
-    for (size_t i = 0; i < 4; i++) 
-	{
+    for (size_t i = 0; i < 4; i++) {
       exampleCard.setType(static_cast<CARDS>(i+1));
-      for (size_t j = 7; j > 0; j--) 
-	  {
+      for (size_t j = 7; j > 0; j--) {
         exampleCard.setValue(j);
         board[i].push_back(exampleCard);
       }
     }
-    for (size_t i = 4; i < 8; i++) 
-	{
+    for (size_t i = 4; i < 8; i++) {
       exampleCard.setType(static_cast<CARDS>(i-3));
-      for (size_t j = 13; j > 7; j--) 
-	  {
+      for (size_t j = 13; j > 7; j--) {
         exampleCard.setValue(j);
         board[i].push_back(exampleCard);
       }
     }
-  }  
-  
-  void moves ()
-  { 
-  	if((cursor_x < 4) && (cursor_y == 0))  //auxiliary cases
-	{
-  		if(aux[cursor_x].getValue() == 0)
-  		{
+  }
+
+
+  void moves (){
+  	if((cursor_x < 4) && (cursor_y == 0)) { //auxiliary cases
+  		if(aux[cursor_x].getValue() == 0) {
   			aux[cursor_x] = board[cursor_marked_x][cursor_marked_y - 1];
   			board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);
   			cout<<"Debug_aux="<<aux[cursor_x].getValue();
-		}
-	}
+  		}
+  	}
 	//else if((cursor_x >= 4) && (cursor_x < 7) && (cursor_y == 0)){} //target cases
-  	
   }
-  
-  
 
-  void loop () 
-  {
-    switch (getch()) 
-	{
+
+  void loop () {
+    switch (getch()) {
       case 'w':
         cursor_y--;
         break;
@@ -114,27 +101,18 @@ public:
         cursor_x++;
         break;
       case ' ':
-      	
-      if(!cursor_marked)
-	  {
-	  	cursor_marked = true;
-        cursor_marked_x = cursor_x;
-        cursor_marked_y = cursor_y;
-      }
-      else if(cursor_marked && (cursor_x != cursor_marked_x || cursor_y != cursor_marked_y))
-      {
-      	moves();
-      	cursor_marked = false;
-	  }
-		  
-      else if (cursor_marked && cursor_x == cursor_marked_x && cursor_y == cursor_marked_y) 
-	  {
-        cursor_marked = false;
-      }
+        if (!cursor_marked) {
+    	  	cursor_marked = true;
+          cursor_marked_x = cursor_x;
+          cursor_marked_y = cursor_y;
+        } else if(cursor_marked && (cursor_x != cursor_marked_x || cursor_y != cursor_marked_y)) {
+        	moves();
+        	cursor_marked = false;
+    	  } else if (cursor_marked && cursor_x == cursor_marked_x && cursor_y == cursor_marked_y) {
+          cursor_marked = false;
+        }
         break;
     }
-    // system("cls");
-
   }
 };
 
@@ -142,13 +120,13 @@ public:
 class graphics_t {
 private:
   game_t* game;
+
   char mark (unsigned short int x, unsigned short int y) {
     unsigned short int pos_x = game->cursor_x;
     unsigned short int pos_y = game->cursor_y;
     unsigned short int pos_x_marked = game->cursor_marked_x;
     unsigned short int pos_y_marked = game->cursor_marked_y;
     bool marked = game->cursor_marked;
-
 
     if (x == pos_x && y == pos_y) {
       if (marked) {
@@ -168,6 +146,8 @@ private:
       }
     }
   }
+
+
   void drawSymbol (CARDS card) {
     SetConsoleOutputCP(CP_UTF8);
     wchar_t s[2];
@@ -192,6 +172,8 @@ private:
     wprintf(L"%S", m);
     SetConsoleOutputCP(869);
   }
+
+
   char getValueChar (unsigned short int value) {
     switch (value) {
       case 1:
@@ -206,6 +188,8 @@ private:
         return static_cast<char>(value) + '0';
     }
   }
+
+
 public:
   void init (game_t* _game) {
     game = _game;
@@ -223,6 +207,8 @@ public:
     cursorInfo.bVisible = false; // set the cursor visibility
     SetConsoleCursorInfo(out, &cursorInfo);
   }
+
+
   void goToStart() {
     HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
     COORD CursorPosition;
@@ -230,6 +216,8 @@ public:
     CursorPosition.Y = 0;
     SetConsoleCursorPosition(console,CursorPosition);
   }
+
+  
   void draw () {
     unsigned short int x = game->cursor_x;
     unsigned short int y = game->cursor_y;
@@ -239,41 +227,33 @@ public:
 
     goToStart();
 
-    for (size_t i = 0; i < 8; i++) 
-	{
+    for (size_t i = 0; i < 8; i++) {
       cout << static_cast<char>(201);
-      for (size_t k = 0; k < 9; k++) 
-	  {
+      for (size_t k = 0; k < 9; k++) {
         cout << static_cast<char>(205);
       }
       cout << static_cast<char>(187);
     }
     cout << endl;
 
-    for (size_t j = 0; j < 8; j++) 
-	{
+    for (size_t j = 0; j < 8; j++) {
       cout << static_cast<char>(186);
-      for (size_t k = 0; k < 3; k++) 
-	  {
-	  	cout << mark(j, 0);
+      for (size_t k = 0; k < 3; k++) {
+  	  	cout << mark(j, 0);
       }
-      if(game->aux[j].getValue() != 0)
-      {
+      if(game->aux[j].getValue() != 0) {
       	cout << setw(2) << getValueChar(game->aux[j].getValue());
       	drawSymbol(game->aux[j].getType());
       }
       else cout<<"XXX";
-      for (size_t k = 0; k < 3; k++) 
-	  {
+      for (size_t k = 0; k < 3; k++) {
         cout << mark(j, 0);
       }
       cout << static_cast<char>(186);
     }
     cout << endl;
 
-    for (size_t i = 0; i < 4; i++)
-	 {
-    	
+    for (size_t i = 0; i < 4; i++) {
       for (size_t j = 0; j < 8; j++) {
         cout << static_cast<char>(186);
         for (size_t k = 0; k < 9; k++) {
@@ -317,14 +297,14 @@ public:
                 cout << static_cast<char>(mark(j, i));
               }
               cout << static_cast<char>(186);
-            }else{
+            } else {
               cout << static_cast<char>(200);
               for (size_t k = 0; k < 9; k++) {
                 cout << static_cast<char>(205);
               }
               cout << static_cast<char>(188);
             }
-          }else{
+          } else {
             cout << "           ";
           }
         }
