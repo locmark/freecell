@@ -105,7 +105,7 @@ public:
       }
     }
 
-    board[3].erase (board[3].begin(), board[3].begin() + 7);
+    // board[3].erase (board[3].begin(), board[3].begin() + 7);
   }
 
 
@@ -391,7 +391,7 @@ public:
       //
 
       for (size_t j = 0; j < 8; j++) {
-        if (game->board[j].size() == 0) {
+        if (game->board[j].size() == 0 || game->board[j].size() == 1) {
           if (i == 0) {
             draw_card_top();
           } else if (i == 1 || i == 2) {
@@ -450,7 +450,7 @@ public:
             endDrawing = false;
             draw_card_content(j, i + 1);
           } else {
-            if (i - 2 < game->board[j].size()) {
+            if (i - 2 < game->board[j].size() || i == 1) {
               endDrawing = false;
               cout << static_cast<char>(186) << "         " << static_cast<char>(186);
             }else{
