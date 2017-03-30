@@ -74,31 +74,45 @@ public:
   }
 
 
-  void moves (){
-  	if((cursor_x < 4) && (cursor_y == 0)) { //auxiliary cases
-  		if(aux[cursor_x].getValue() == 0) {
+  void moves () {
+  	if ((cursor_x < 4) && (cursor_y == 0)) { //auxiliary cases
+  		if (aux[cursor_x].getValue() == 0) {
   			aux[cursor_x] = board[cursor_marked_x][cursor_marked_y - 1];
   			board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);
-  			cout<<"Debug_aux="<<aux[cursor_x].getValue();
+  			cout << "Debug_aux=" << aux[cursor_x].getValue();
   		}
   	}
-	//else if((cursor_x >= 4) && (cursor_x < 7) && (cursor_y == 0)){} //target cases
+  	//else if((cursor_x >= 4) && (cursor_x < 7) && (cursor_y == 0)){} //target cases
   }
 
 
   void loop () {
     switch (getch()) {
       case 'w':
-        cursor_y--;
+        if (cursor_y > 0) {
+          cursor_y--;
+        }
         break;
       case 's':
-        cursor_y++;
+        if (cursor_y < board[cursor_x].size()) {
+          cursor_y++;
+        }
         break;
       case 'a':
-        cursor_x--;
+        if (cursor_x > 0) {
+          if (cursor_y != 0 && cursor_y > board[cursor_x - 1].size()) {
+            cursor_y = board[cursor_x - 1].size();
+          }
+          cursor_x--;
+        }
         break;
       case 'd':
-        cursor_x++;
+        if (cursor_x < 7) {
+          if (cursor_y != 0 && cursor_y > board[cursor_x + 1].size()) {
+            cursor_y = board[cursor_x + 1].size();
+          }
+          cursor_x++;
+        }
         break;
       case ' ':
         if (!cursor_marked) {
@@ -217,7 +231,7 @@ public:
     SetConsoleCursorPosition(console,CursorPosition);
   }
 
-  
+
   void draw () {
     unsigned short int x = game->cursor_x;
     unsigned short int y = game->cursor_y;
