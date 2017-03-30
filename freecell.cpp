@@ -3,40 +3,38 @@
 #include <windows.h>
 #include <conio.h>
 #include <vector>
-
+#include <ctime>
 
 using namespace std;
 
 enum CARDS {
-  KIER = 1,
-  KARO,
-  PIK,
-  TREFL
+  	KIER = 1,
+  	KARO,
+  	PIK,
+  	TREFL
 };
 
 enum COLORS {
-  BLACK = false,
-  RED = true
+	BLACK = false,
+  	RED = true
 };
-
 
 class card_t {
 private:
-  CARDS type;
-  unsigned short int value;
+	CARDS type;
+  	unsigned short int value;
 public:
-  bool getColor () {return type <= 2;}
-  CARDS getType () {return type;}
-  unsigned short int getValue () {return value;}
-  void setType (CARDS _type) {type = _type;}
-  void setValue (unsigned short int _value) {value = _value;}
-  card_t () {}
-  card_t (CARDS _type, unsigned short int _value) {
-    type = _type;
-    value = _value;
-  }
+  	bool getColor () {return type <= 2;}
+  	CARDS getType () {return type;}
+  	unsigned short int getValue () {return value;}
+  	void setType (CARDS _type) {type = _type;}
+  	void setValue (unsigned short int _value) {value = _value;}
+  	card_t () {}
+  	card_t (CARDS _type, unsigned short int _value) {
+    	type = _type;
+    	value = _value;
+  	}
 };
-
 
 class game_t {
 private:
@@ -63,7 +61,7 @@ private:
 						aux[cursor_marked_x].setValue(0);
 					} //else message NOT FREE	
 				}
-				if(cursor_marked_y > 0) { //board->aux case CORRECTED
+				if(cursor_marked_y > 0) { //board->aux case 
 					if((aux[cursor_x].getValue() == 0) && (board[cursor_marked_x].size() != 0) && (board[cursor_marked_x].size() == cursor_marked_y)) {
 						aux[cursor_x] = board[cursor_marked_x][cursor_marked_y - 1];
 						board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);
@@ -77,7 +75,7 @@ private:
 						aux[cursor_marked_x].setValue(0);
 					} //else message NOT POSSIBLE
 				}
-				if(cursor_marked_y > 0) { //board->target case CORRECTED
+				if(cursor_marked_y > 0) { //board->target case
 					if(((board[cursor_marked_x].size() == cursor_marked_y) && (board[cursor_marked_x].size() != 0)) && (((target[cursor_x - 4].getValue() == 0) && (board[cursor_marked_x][cursor_marked_y - 1].getValue() == 1)) || ((target[cursor_x - 4].getValue() == (board[cursor_marked_x][cursor_marked_y - 1].getValue() - 1)) && (target[cursor_x - 4].getType() == board[cursor_marked_x][cursor_marked_y - 1].getType())))) { //whaaat the fuck?
 						target[cursor_x - 4] = board[cursor_marked_x][cursor_marked_y - 1];
 						board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);
@@ -94,11 +92,8 @@ private:
 			}
 			if(cursor_marked_y > 0) { //board->board case
 				if((board[cursor_x].size() == 0) || (board[cursor_x].size() == cursor_y)) { //has to be put on top or empty
-					//cout<<"Top checked"<<endl;
-					if((board[cursor_x].size() == 0) || (board[cursor_x][cursor_y - 1].getValue() == (board[cursor_marked_x][cursor_marked_y - 1].getValue() + 1)) && (board[cursor_x][cursor_y - 1].getType() != (board[cursor_marked_x][cursor_marked_y - 1].getType()))) {
-						//cout<<"Colour checked"<<endl;
+					if((board[cursor_x].size() == 0) || (board[cursor_x][cursor_y - 1].getValue() == (board[cursor_marked_x][cursor_marked_y - 1].getValue() + 1)) && (board[cursor_x][cursor_y - 1].getColor() != (board[cursor_marked_x][cursor_marked_y - 1].getColor()))) {
 						if(isInOrder(cursor_marked_x, cursor_marked_y - 1, board[cursor_marked_x].size() - 1) && (countFreeCells() >= (board[cursor_marked_x].size() - cursor_marked_y))) {
-							//cout<<"Freecells and order checked"<<endl;
 							for(size_t i = cursor_marked_y - 1, initial_size = board[cursor_marked_x].size(); i < initial_size; i++) {
 								board[cursor_x].push_back(board[cursor_marked_x][cursor_marked_y - 1]);
 								board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);	
@@ -110,17 +105,17 @@ private:
 		}			
   	}	
 public:
-  unsigned short int cursor_x = 0;
-  unsigned short int cursor_y = 0;
-  unsigned short int cursor_marked_x = 0;
-  unsigned short int cursor_marked_y = 0;
-  bool cursor_marked = false;
+	unsigned short int cursor_x = 0;
+  	unsigned short int cursor_y = 0;
+  	unsigned short int cursor_marked_x = 0;
+  	unsigned short int cursor_marked_y = 0;
+  	bool cursor_marked = false;
 
-  vector<card_t> board[8];
-  card_t target[4];
-  card_t aux[4];    // auxiliary
-  
-  bool isInOrder(unsigned short which, unsigned short from, unsigned short to) {
+  	vector<card_t> board[8];
+  	card_t target[4];
+  	card_t aux[4];
+	
+	bool isInOrder(unsigned short which, unsigned short from, unsigned short to) {
 		if((from == to) || (to == from + 1)) 
 			return true;
 		for(size_t i = from; i < to; i++) {
@@ -130,31 +125,45 @@ public:
 			return true;
 		}	
 	}
-
-  void init () {    // **testing set**
-  	for(size_t i = 0; i < 4; i++) { //clear cells
-  		target[i].setValue(0);
-  		aux[i].setValue(0);
-	  }
-    card_t exampleCard;
-    for (size_t i = 0; i < 4; i++) {
-      exampleCard.setType(static_cast<CARDS>(i+1));
-      for (size_t j = 7; j > 0; j--) {
-        exampleCard.setValue(j);
-        board[i].push_back(exampleCard);
-      }
-    }
-    for (size_t i = 4; i < 8; i++) {
-      exampleCard.setType(static_cast<CARDS>(i-3));
-      for (size_t j = 13; j > 7; j--) {
-        exampleCard.setValue(j);
-        board[i].push_back(exampleCard);
-      }
-    }
-
-    // board[3].erase (board[3].begin(), board[3].begin() + 7);
-  }
-  
+	
+	void createBoard() {
+		for(size_t i = 0; i < 4; i++) { //clear cells
+  			target[i].setValue(0);
+  			aux[i].setValue(0);
+		}
+		vector<card_t> cards_buffer;
+    	card_t example_card;
+    	for (size_t i = 0; i < 4; i++) { //fill cards_buffer linearly
+      		example_card.setType(static_cast<CARDS>(i+1));
+      		for(size_t j = 0; j < 13; j++) {
+      			example_card.setValue(j+1);
+      			cards_buffer.push_back(example_card);
+			}
+    	}
+    	srand(time(NULL));
+    	for(size_t i = 0; i < 4; i++) { //randomize for first 4 stacks
+    		for(size_t j = 0; j < 7; j++) {
+    			unsigned short random_card = (rand() % (cards_buffer.size() - 1));
+				board[i].push_back(cards_buffer[random_card]);
+				cards_buffer.erase(cards_buffer.begin() + random_card);
+			}
+		}
+		for(size_t i = 4; i < 8; i++) { //randomize for last 4 stacks
+    		for(size_t j = 0; j < 6; j++) {
+    			unsigned short random_card;
+    			if(cards_buffer.size() > 1) {
+    				 random_card = (rand() % (cards_buffer.size() - 1));
+    			}
+    			else {
+    				random_card == 0;
+				}
+    			board[i].push_back(cards_buffer[random_card]);
+				cards_buffer.erase(cards_buffer.begin() + random_card);
+				cout<<random_card<<endl;
+			}
+		}
+	}
+	
   bool checkIfWin() {
   	bool won = true;
   	for(size_t i = 0; i < 8; i++) {
@@ -162,124 +171,120 @@ public:
 	  }
 	  return won || (target[0].getValue() == 13 && target[1].getValue() == 13 && target[2].getValue() == 13 && target[3].getValue() == 13);
 	}
-
-
-  void loop () {
-    switch (getch()) {
-      case 'w':
-        if (cursor_y > 0) {
-          cursor_y--;
-        }
-        break;
-      case 's':
-        if (cursor_y < board[cursor_x].size() || (board[cursor_x].size() == 0 && cursor_y == 0)) {
-          cursor_y++;
-        }
-        break;
-      case 'a':
-        if (cursor_x > 0) {
-          if (cursor_y != 0 && cursor_y > board[cursor_x - 1].size()) {
-            if (board[cursor_x - 1].size() == 0) {
-              cursor_y = 1;
-            } else {
-              cursor_y = board[cursor_x - 1].size();
-            }
-          }
-          cursor_x--;
-        }
-        break;
-      case 'd':
-        if (cursor_x < 7) {
-          if (cursor_y != 0 && cursor_y > board[cursor_x + 1].size()) {
-            if (board[cursor_x + 1].size() == 0) {
-              cursor_y = 1;
-            } else {
-              cursor_y = board[cursor_x + 1].size();
-            }
-          }
-          cursor_x++;
-        }
-        break;
-      case ' ':
-        if (!cursor_marked) {
-			cursor_marked = true;
-          	cursor_marked_x = cursor_x;
-          	cursor_marked_y = cursor_y;
-        } 
-		else if(cursor_marked && (cursor_x != cursor_marked_x || cursor_y != cursor_marked_y)) {
-        	makeMove();
-        	if(checkIfWin() == true)
-        	{
-        		system("CLS");
-        		cout<<"YOU WON!!!"<<endl;
-        		system("PAUSE");
-        		exit(0);
-			}
-        	cursor_marked = false;
-    	  } 
-		  else if (cursor_marked && cursor_x == cursor_marked_x && cursor_y == cursor_marked_y) {
-          cursor_marked = false;
-        }
-        break;
-    }
-  }
+	
+	void loop () {
+    	switch (getch()) {
+      		case 'w':
+        		if (cursor_y > 0) {
+          			cursor_y--;
+        		}
+        	break;
+      		case 's':
+        		if (cursor_y < board[cursor_x].size() || (board[cursor_x].size() == 0 && cursor_y == 0)) {
+          			cursor_y++;
+        		}
+        	break;
+      		case 'a':
+        		if (cursor_x > 0) {
+          			if (cursor_y != 0 && cursor_y > board[cursor_x - 1].size()) {
+            			if (board[cursor_x - 1].size() == 0) {
+              				cursor_y = 1;
+            			} 
+						else {
+              				cursor_y = board[cursor_x - 1].size();
+            			}
+          			}
+          			cursor_x--;
+        		}
+        	break;
+      		case 'd':
+        		if (cursor_x < 7) {
+          			if (cursor_y != 0 && cursor_y > board[cursor_x + 1].size()) {
+            			if (board[cursor_x + 1].size() == 0) {
+              				cursor_y = 1;
+           				} 
+						else {
+              				cursor_y = board[cursor_x + 1].size();
+            			}
+          			}
+          			cursor_x++;
+        		}
+        	break;
+      		case ' ':
+        		if (!cursor_marked) {
+					cursor_marked = true;
+          			cursor_marked_x = cursor_x;
+          			cursor_marked_y = cursor_y;
+        		} 
+				else if(cursor_marked && (cursor_x != cursor_marked_x || cursor_y != cursor_marked_y)) {
+        			makeMove();
+        			if(checkIfWin() == true) {
+        				system("CLS");
+        				cout<<"YOU WON!!!"<<endl;
+        				system("PAUSE");
+        				exit(0);
+					}
+        			cursor_marked = false;
+    	  		} 
+		  		else if (cursor_marked && cursor_x == cursor_marked_x && cursor_y == cursor_marked_y) {
+          			cursor_marked = false;
+        		}
+        	break;
+    	}
+  	}
 };
 
 
 class graphics_t {
 private:
-  game_t* game;
+	game_t* game;
+	char mark (unsigned short int x, unsigned short int y) {
+    	unsigned short int pos_x = game->cursor_x;
+    	unsigned short int pos_y = game->cursor_y;
+    	unsigned short int pos_x_marked = game->cursor_marked_x;
+    	unsigned short int pos_y_marked = game->cursor_marked_y;
+    	bool marked = game->cursor_marked;
 
-  char mark (unsigned short int x, unsigned short int y) {
-    unsigned short int pos_x = game->cursor_x;
-    unsigned short int pos_y = game->cursor_y;
-    unsigned short int pos_x_marked = game->cursor_marked_x;
-    unsigned short int pos_y_marked = game->cursor_marked_y;
-    bool marked = game->cursor_marked;
-
-    if (x == pos_x && y == pos_y) {
-      if (marked) {
-        if (pos_x == pos_x_marked && pos_y == pos_y_marked) {
-          return static_cast<char>(178);
-        } else {
-          return static_cast<char>(176);
-        }
-      } else {
-        return static_cast<char>(176);
-      }
-    } else {
-      if (marked && x == pos_x_marked && y == pos_y_marked) {
-        return static_cast<char>(177);
-      } else {
-        return ' ';
-      }
-    }
-  }
-
+    	if (x == pos_x && y == pos_y) {
+      		if (marked) {
+        		if (pos_x == pos_x_marked && pos_y == pos_y_marked) {
+          			return static_cast<char>(178);
+        		} 
+				else {
+          			return static_cast<char>(176);
+        		}
+      		}
+			else {
+        		return static_cast<char>(176);
+      		}
+    	} 
+		else {
+      		if (marked && x == pos_x_marked && y == pos_y_marked) {
+        		return static_cast<char>(177);
+      		} 
+	  		else {
+        		return ' ';
+      		}
+    	}
+  	}
 
   void drawSymbol (CARDS card) {
-    SetConsoleOutputCP(CP_UTF8);
-    wchar_t s[2];
+    SetConsoleOutputCP(850);
     switch (card) {
       case KIER:
-        s[0] = 'H'; //poprawilem na dzialajace u mnie oznaczenia, potem mozemy wrocic do jakichs ladniejszych
+        cout<<static_cast<char>(3);
         break;
       case KARO:
-        s[0] = 'D';
+         cout<<static_cast<char>(4);
         break;
       case PIK:
-        s[0] = 'S';
+         cout<<static_cast<char>(5);
         break;
       case TREFL:
-        s[0] = 'C';
+         cout<<static_cast<char>(6);
         break;
     }
-    s[1] = '\0';
-    int bufferSize = WideCharToMultiByte(CP_UTF8, 0, s, -1, NULL, 0, NULL, NULL);
-    char* m = new char[bufferSize];
-    WideCharToMultiByte(CP_UTF8, 0, s, -1, m, bufferSize, NULL, NULL);
-    wprintf(L"%S", m);
-    SetConsoleOutputCP(869);
+    SetConsoleOutputCP(852);
   }
 
 
@@ -304,7 +309,7 @@ private:
     COORD CursorPosition;
     CursorPosition.X = 0;
     CursorPosition.Y = 0;
-    SetConsoleCursorPosition(console,CursorPosition);
+    SetConsoleCursorPosition(console, CursorPosition);
   }
 
 
@@ -329,7 +334,7 @@ private:
   void draw_card_body (unsigned short int x, unsigned short int y) {
     cout << static_cast<char>(186);
     for (size_t k = 0; k < 9; k++) {
-      cout << static_cast<char>(mark(x, y));
+      cout << mark(x, y);
     }
     cout << static_cast<char>(186);
   }
@@ -374,7 +379,7 @@ private:
       }
     } else {
       for (size_t k = 0; k < 3; k++) {
-        cout << static_cast<char>(mark(x, y));
+        cout << mark(x, y);
       }
       if (game->board[x][y-1].getValue() == 10)
         cout << setw(2) << 10;
@@ -382,7 +387,7 @@ private:
         cout << setw(2) << getValueChar(game->board[x][y - 1].getValue());
       drawSymbol(game->board[x][y - 1].getType());
       for (size_t k = 0; k < 3; k++) {
-        cout << static_cast<char>(mark(x, y));
+        cout << mark(x, y);
       }
     }
     cout << static_cast<char>(186);
@@ -428,10 +433,8 @@ public:
     RECT r;
 
     GetWindowRect(console, &r); //stores the console's current dimensions
-    //MoveWindow(window_handle, x, y, width, height, redraw_window);
     MoveWindow(console, r.left, r.top, 800, 600, TRUE);
-    // cout << "graphics Init " << _game->board[1][1].getType() << endl;
-
+    
     GetConsoleCursorInfo(out, &cursorInfo);
     cursorInfo.bVisible = false; // set the cursor visibility
     SetConsoleCursorInfo(out, &cursorInfo);
@@ -479,7 +482,7 @@ public:
               if (i - 2 < game->board[j].size()) {
                 cout << static_cast<char>(186);
                 for (size_t k = 0; k < 9; k++) {
-                  cout << static_cast<char>(mark(j, i));
+                  cout << mark(j, i);
                 }
                 cout << static_cast<char>(186);
               } else {
@@ -530,18 +533,18 @@ public:
 
 
 int main(int argc, const char **argv) {
-  game_t game;
-  graphics_t graphics;
+	game_t game;
+  	graphics_t graphics;
 
-  game.init();
-  graphics.init(&game);
+  	game.createBoard();
+  	graphics.init(&game);
 
-  graphics.draw();
-  while (1) {
-    game.loop();
+  	graphics.draw();
+  	
+  	while (1) {
+    	game.loop();
+    	graphics.draw();
+  	}
 
-    graphics.draw();
-  }
-
-  return 0;
+  	return 0;
 }
