@@ -264,39 +264,29 @@ private:
   }
 
 
+  void draw_card_content (unsigned short int x, unsigned short int y) {
+    // if (y == 0) {
+    //
+    // } else {
+      cout << static_cast<char>(186);
+      for (size_t k = 0; k < 3; k++) {
+        cout << static_cast<char>(mark(x, y + 1));
+      }
+      if (game->board[x][y].getValue() == 10)
+        cout << setw(2) << 10;
+      else
+        cout << setw(2) << getValueChar(game->board[x][y].getValue());
+      drawSymbol(game->board[x][y].getType());
+      for (size_t k = 0; k < 3; k++) {
+        cout << static_cast<char>(mark(x, y + 1));
+      }
+      cout << static_cast<char>(186);
+    // }
+
+  }
+
+
   void draw_top_part () {
-
-  }
-
-
-public:
-  void init (game_t* _game) {
-    game = _game;
-    HWND console = GetConsoleWindow();
-    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
-    CONSOLE_CURSOR_INFO cursorInfo;
-    RECT r;
-
-    GetWindowRect(console, &r); //stores the console's current dimensions
-    //MoveWindow(window_handle, x, y, width, height, redraw_window);
-    MoveWindow(console, r.left, r.top, 800, 600, TRUE);
-    // cout << "graphics Init " << _game->board[1][1].getType() << endl;
-
-    GetConsoleCursorInfo(out, &cursorInfo);
-    cursorInfo.bVisible = false; // set the cursor visibility
-    SetConsoleCursorInfo(out, &cursorInfo);
-  }
-
-
-  void draw () {
-    unsigned short int x = game->cursor_x;
-    unsigned short int y = game->cursor_y;
-    unsigned short int x_marked = game->cursor_marked_x;
-    unsigned short int y_marked = game->cursor_marked_y;
-    bool marked = game->cursor_marked;
-
-    goToStart();
-
     for (size_t i = 0; i < 8; i++) {
       draw_card_top();
     }
@@ -350,12 +340,43 @@ public:
 
     cout << endl;
 
+  }
+
+
+public:
+  void init (game_t* _game) {
+    game = _game;
+    HWND console = GetConsoleWindow();
+    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_CURSOR_INFO cursorInfo;
+    RECT r;
+
+    GetWindowRect(console, &r); //stores the console's current dimensions
+    //MoveWindow(window_handle, x, y, width, height, redraw_window);
+    MoveWindow(console, r.left, r.top, 800, 600, TRUE);
+    // cout << "graphics Init " << _game->board[1][1].getType() << endl;
+
+    GetConsoleCursorInfo(out, &cursorInfo);
+    cursorInfo.bVisible = false; // set the cursor visibility
+    SetConsoleCursorInfo(out, &cursorInfo);
+  }
+
+
+  void draw () {
+    goToStart();
+
+    draw_top_part();
+
     bool endDrawing = false;
 
     size_t i = 0;
 
     for (size_t i = 0; !endDrawing; i++) {
       endDrawing = true;
+
+      //
+      // odd part
+      //
 
       for (size_t j = 0; j < 8; j++) {
         if (game->board[j].size() == 0) {
@@ -401,6 +422,10 @@ public:
 
       cout << endl;
 
+      //
+      // even part
+      //
+
       for (size_t j = 0; j < 8; j++) {
         if (game->board[j].size() == 0) {
           if (i == 1 || i == 0 || i == 2) {
@@ -411,19 +436,7 @@ public:
         } else {
           if (game->board[j].size() > i) {
             endDrawing = false;
-            cout << static_cast<char>(186);
-            for (size_t k = 0; k < 3; k++) {
-              cout << static_cast<char>(mark(j, i + 1));
-            }
-            if (game->board[j][i].getValue() == 10)
-              cout << setw(2) << 10;
-            else
-              cout << setw(2) << getValueChar(game->board[j][i].getValue());
-            drawSymbol(game->board[j][i].getType());
-            for (size_t k = 0; k < 3; k++) {
-              cout << static_cast<char>(mark(j, i + 1));
-            }
-            cout << static_cast<char>(186);
+            draw_card_content(j, i);
           } else {
             if (i - 2 < game->board[j].size()) {
               endDrawing = false;
