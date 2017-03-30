@@ -40,38 +40,85 @@ public:
 
 class game_t {
 private:
-	void makeMove () {
-		if ((cursor_x < 4) && (cursor_y == 0)) { //sth->aux cases
-			if((cursor_marked_x < 4) && (cursor_marked_y == 0)) { //aux->aux case
-				if(aux[cursor_x].getValue() == 0) {
-					aux[cursor_x] = aux[cursor_marked_x];
-					aux[cursor_marked_x].setValue(0);
-				} //else message NOT FREE
+	unsigned short countFreeCells() {
+		unsigned short count = 0;
+		for(size_t i = 0; i < 8; i++) {
+			if(i < 4) { //check aux
+				if(aux[i].getValue() == 0) {
+					count++;
+				}
 			}
-			if(cursor_marked_y > 0) { //board->aux case
-				if(aux[cursor_x].getValue() == 0) {
-					aux[cursor_x] = board[cursor_marked_x][cursor_marked_y - 1];
-					board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);
-				} //else message NOT FREE
+			if(board[i].empty()) { //check board
+				count++;
 			}
 		}
-		if((cursor_x >= 4) && (cursor_y == 0)) { //sth->target cases
-			if((cursor_marked_x < 4) && (cursor_marked_y == 0)) { //aux->target case
-				if(((target[cursor_x - 4].getValue() == 0) && (aux[cursor_marked_x].getValue() == 1)) || ((target[cursor_x - 4].getValue() == (aux[cursor_marked_x].getValue() - 1)) && (target[cursor_x - 4].getType() == aux[cursor_marked_x].getType()))) { //what the fuck?
-					target[cursor_x - 4] = aux[cursor_marked_x];
-					aux[cursor_marked_x].setValue(0);
-				} //else message NOT POSSIBLE
-			}
-			if(cursor_marked_y > 0) { //board->target case
-				if((board[cursor_marked_x].size() == cursor_marked_y) && (((target[cursor_x - 4].getValue() == 0) && (board[cursor_marked_x][cursor_marked_y - 1].getValue() == 1)) || ((target[cursor_x - 4].getValue() == (board[cursor_marked_x][cursor_marked_y - 1].getValue() - 1)) && (target[cursor_x - 4].getType() == board[cursor_marked_x][cursor_marked_y - 1].getType())))) { //whaaat the fuck?
-					target[cursor_x - 4] = board[cursor_marked_x][cursor_marked_y - 1];
-					board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);
-				} //else message NOT POSSIBLE
-			}
-		}
+		return count;
 	}
-
-
+	bool isInOrder(unsigned short which, unsigned short from, unsigned short to) {
+		if(from == to) 
+			return true;
+		for(size_t i = from; i < to; i++) {
+			if((board[which][i].getValue() != (board[which][i+1].getValue() - 1)) && (board[which][i].getType() == board[which][i+1].getType())) {
+				return false;
+			}
+			return true;
+		}	
+	}
+	void makeMove () {
+		if(cursor_y == 0) { //sth->aux or sth->target cases DONE
+			if (cursor_x < 4) { //sth->aux cases 
+				if((cursor_marked_x < 4) && (cursor_marked_y == 0)) { //aux->aux case
+					if(aux[cursor_x].getValue() == 0) {
+						aux[cursor_x] = aux[cursor_marked_x];
+						aux[cursor_marked_x].setValue(0);
+					} //else message NOT FREE	
+				}
+				if(cursor_marked_y > 0) { //board->aux case CORRECTED
+					if((aux[cursor_x].getValue() == 0) && (board[cursor_marked_x].size() != 0) && (board[cursor_marked_x].size() == cursor_marked_y)) {
+						aux[cursor_x] = board[cursor_marked_x][cursor_marked_y - 1];
+						board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);
+					} //else message NOT FREE				
+				}	
+			}
+			if(cursor_x >= 4) { //sth->target cases
+				if((cursor_marked_x < 4) && (cursor_marked_y == 0)) { //aux->target case
+					if(((target[cursor_x - 4].getValue() == 0) && (aux[cursor_marked_x].getValue() == 1)) || ((target[cursor_x - 4].getValue() == (aux[cursor_marked_x].getValue() - 1)) && (target[cursor_x - 4].getType() == aux[cursor_marked_x].getType()))) { //what the fuck?
+						target[cursor_x - 4] = aux[cursor_marked_x];
+						aux[cursor_marked_x].setValue(0);
+					} //else message NOT POSSIBLE
+				}
+				if(cursor_marked_y > 0) { //board->target case CORRECTED
+					if(((board[cursor_marked_x].size() == cursor_marked_y) && (board[cursor_marked_x].size() != 0)) && (((target[cursor_x - 4].getValue() == 0) && (board[cursor_marked_x][cursor_marked_y - 1].getValue() == 1)) || ((target[cursor_x - 4].getValue() == (board[cursor_marked_x][cursor_marked_y - 1].getValue() - 1)) && (target[cursor_x - 4].getType() == board[cursor_marked_x][cursor_marked_y - 1].getType())))) { //whaaat the fuck?
+						target[cursor_x - 4] = board[cursor_marked_x][cursor_marked_y - 1];
+						board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);
+					} //else message NOT POSSIBLE				
+				}
+			}
+		}
+		if(cursor_y > 0) { //aux->board or board->board cases
+			if((cursor_marked_x < 4) && (cursor_marked_y == 0)) { //aux->board case
+				if((board[cursor_x].size() == 0) || (board[cursor_x][cursor_y - 1].getValue() == (aux[cursor_marked_x].getValue() + 1)) && (board[cursor_x][cursor_y - 1].getColor() != aux[cursor_marked_x].getColor())) {
+					board[cursor_x].push_back(aux[cursor_marked_x]);
+					aux[cursor_marked_x].setValue(0);
+				}
+			}
+			if(cursor_marked_y > 0) { //board->board case
+				if((board[cursor_x].size() == 0) || (board[cursor_x].size() == cursor_y)) { //has to be put on top
+					//cout<<"Top checked"<<endl;
+					if((board[cursor_x][cursor_y - 1].getValue() == (board[cursor_marked_x][cursor_marked_y - 1].getValue() + 1)) && (board[cursor_x][cursor_y - 1].getType() != (board[cursor_marked_x][cursor_marked_y - 1].getType()))) {
+						//cout<<"Colour checked"<<endl;
+						if(isInOrder(cursor_marked_x, cursor_marked_y - 1, board[cursor_marked_x].size() - 1) && (countFreeCells() >= (board[cursor_marked_x].size() - cursor_marked_y))) {
+							//cout<<"Freecells and order checked"<<endl;
+							for(size_t i = cursor_marked_y - 1, initial_size = board[cursor_marked_x].size(); i < initial_size; i++) {
+								board[cursor_x].push_back(board[cursor_marked_x][cursor_marked_y - 1]);
+								board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);	
+							}
+						}
+					}
+				}
+			}	
+		}			
+  	}	
 public:
   unsigned short int cursor_x = 0;
   unsigned short int cursor_y = 0;
