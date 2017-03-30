@@ -46,13 +46,13 @@ private:
 				if(aux[cursor_x].getValue() == 0) {
 					aux[cursor_x] = aux[cursor_marked_x];
 					aux[cursor_marked_x].setValue(0);
-				} //else message NOT FREE	
+				} //else message NOT FREE
 			}
 			if(cursor_marked_y > 0) { //board->aux case
 				if(aux[cursor_x].getValue() == 0) {
 					aux[cursor_x] = board[cursor_marked_x][cursor_marked_y - 1];
 					board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);
-				} //else message NOT FREE				
+				} //else message NOT FREE
 			}
 		}
 		if((cursor_x >= 4) && (cursor_y == 0)) { //sth->target cases
@@ -66,14 +66,14 @@ private:
 				if((board[cursor_marked_x].size() == cursor_marked_y) && (((target[cursor_x - 4].getValue() == 0) && (board[cursor_marked_x][cursor_marked_y - 1].getValue() == 1)) || ((target[cursor_x - 4].getValue() == (board[cursor_marked_x][cursor_marked_y - 1].getValue() - 1)) && (target[cursor_x - 4].getType() == board[cursor_marked_x][cursor_marked_y - 1].getType())))) { //whaaat the fuck?
 					target[cursor_x - 4] = board[cursor_marked_x][cursor_marked_y - 1];
 					board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);
-				} //else message NOT POSSIBLE				
+				} //else message NOT POSSIBLE
 			}
-		}		
-  	}
+		}
+	}
 
 
 
-	
+
 public:
   unsigned short int cursor_x = 0;
   unsigned short int cursor_y = 0;
@@ -106,6 +106,8 @@ public:
         board[i].push_back(exampleCard);
       }
     }
+
+    board[3].erase (board[3].begin(), board[3].begin() + 7);
   }
 
   void loop () {
@@ -122,7 +124,7 @@ public:
         break;
       case 'a':
         if (cursor_x > 0) {
-          if (cursor_y != 0 && cursor_y > board[cursor_x - 1].size()) {
+          if (cursor_y != 0 && cursor_y > board[cursor_x - 1].size() && board[cursor_x - 1].size() != 0) {
             cursor_y = board[cursor_x - 1].size();
           }
           cursor_x--;
@@ -130,7 +132,7 @@ public:
         break;
       case 'd':
         if (cursor_x < 7) {
-          if (cursor_y != 0 && cursor_y > board[cursor_x + 1].size()) {
+          if (cursor_y != 0 && cursor_y > board[cursor_x + 1].size() && board[cursor_x + 1].size() != 0) {
             cursor_y = board[cursor_x + 1].size();
           }
           cursor_x++;
@@ -226,6 +228,47 @@ private:
   }
 
 
+  void goToStart() {
+    HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+    COORD CursorPosition;
+    CursorPosition.X = 0;
+    CursorPosition.Y = 0;
+    SetConsoleCursorPosition(console,CursorPosition);
+  }
+
+
+  void draw_card_top () {
+    cout << static_cast<char>(201);
+    for (size_t k = 0; k < 9; k++) {
+      cout << static_cast<char>(205);
+    }
+    cout << static_cast<char>(187);
+  }
+
+
+  void draw_card_bottom () {
+    cout << static_cast<char>(200);
+    for (size_t k = 0; k < 9; k++) {
+      cout << static_cast<char>(205);
+    }
+    cout << static_cast<char>(188);
+  }
+
+
+  void draw_card_body (unsigned short int x, unsigned short int y) {
+    cout << static_cast<char>(186);
+    for (size_t k = 0; k < 9; k++) {
+      cout << static_cast<char>(mark(x, y));
+    }
+    cout << static_cast<char>(186);
+  }
+
+
+  void draw_top_part () {
+
+  }
+
+
 public:
   void init (game_t* _game) {
     game = _game;
@@ -245,15 +288,6 @@ public:
   }
 
 
-  void goToStart() {
-    HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
-    COORD CursorPosition;
-    CursorPosition.X = 0;
-    CursorPosition.Y = 0;
-    SetConsoleCursorPosition(console,CursorPosition);
-  }
-
-
   void draw () {
     unsigned short int x = game->cursor_x;
     unsigned short int y = game->cursor_y;
@@ -264,12 +298,9 @@ public:
     goToStart();
 
     for (size_t i = 0; i < 8; i++) {
-      cout << static_cast<char>(201);
-      for (size_t k = 0; k < 9; k++) {
-        cout << static_cast<char>(205);
-      }
-      cout << static_cast<char>(187);
+      draw_card_top();
     }
+
     cout << endl;
 
     for (size_t j = 0; j < 4; j++) {
@@ -287,6 +318,7 @@ public:
       }
       cout << static_cast<char>(186);
     }
+
     for (size_t j = 4; j < 8; j++) {
       cout << static_cast<char>(186);
       for (size_t k = 0; k < 3; k++) {
@@ -302,26 +334,20 @@ public:
       }
       cout << static_cast<char>(186);
     }
+
     cout << endl;
 
     for (size_t i = 0; i < 4; i++) {
       for (size_t j = 0; j < 8; j++) {
-        cout << static_cast<char>(186);
-        for (size_t k = 0; k < 9; k++) {
-          cout << static_cast<char>(mark(j, 0));
-        }
-        cout << static_cast<char>(186);
+        draw_card_body (j, 0);
       }
       cout << endl;
     }
 
     for (size_t i = 0; i < 8; i++) {
-        cout << static_cast<char>(200);
-        for (size_t k = 0; k < 9; k++) {
-          cout << static_cast<char>(205);
-        }
-        cout << static_cast<char>(188);
-      }
+      draw_card_bottom ();
+    }
+
     cout << endl;
 
     bool endDrawing = false;
@@ -332,31 +358,43 @@ public:
       endDrawing = true;
 
       for (size_t j = 0; j < 8; j++) {
-        if (game->board[j].size() > i) {
-          endDrawing = false;
-          cout << static_cast<char>(201);
-          for (size_t k = 0; k < 9; k++) {
-            cout << static_cast<char>(205);
-          }
-          cout << static_cast<char>(187);
-        } else {
-          if (i - 2 <= game->board[j].size()) {
-            endDrawing = false;
-            if (i - 2 < game->board[j].size()) {
-              cout << static_cast<char>(186);
-              for (size_t k = 0; k < 9; k++) {
-                cout << static_cast<char>(mark(j, i));
-              }
-              cout << static_cast<char>(186);
-            } else {
-              cout << static_cast<char>(200);
-              for (size_t k = 0; k < 9; k++) {
-                cout << static_cast<char>(205);
-              }
-              cout << static_cast<char>(188);
-            }
+        if (game->board[j].size() == 0) {
+          if (i == 0) {
+            draw_card_top();
+          } else if (i == 1 || i == 2) {
+            draw_card_body(j, 1);
+          } else if (i == 3) {
+            draw_card_bottom();
           } else {
             cout << "           ";
+          }
+        } else {
+          if (game->board[j].size() > i) {
+            endDrawing = false;
+            cout << static_cast<char>(201);
+            for (size_t k = 0; k < 9; k++) {
+              cout << static_cast<char>(205);
+            }
+            cout << static_cast<char>(187);
+          } else {
+            if (i - 2 <= game->board[j].size()) {
+              endDrawing = false;
+              if (i - 2 < game->board[j].size()) {
+                cout << static_cast<char>(186);
+                for (size_t k = 0; k < 9; k++) {
+                  cout << static_cast<char>(mark(j, i));
+                }
+                cout << static_cast<char>(186);
+              } else {
+                cout << static_cast<char>(200);
+                for (size_t k = 0; k < 9; k++) {
+                  cout << static_cast<char>(205);
+                }
+                cout << static_cast<char>(188);
+              }
+            } else {
+              cout << "           ";
+            }
           }
         }
       }
@@ -364,27 +402,35 @@ public:
       cout << endl;
 
       for (size_t j = 0; j < 8; j++) {
-        if (game->board[j].size() > i) {
-          endDrawing = false;
-          cout << static_cast<char>(186);
-          for (size_t k = 0; k < 3; k++) {
-            cout << static_cast<char>(mark(j, i + 1));
-          }
-          if (game->board[j][i].getValue() == 10)
-            cout << setw(2) << 10;
-          else
-            cout << setw(2) << getValueChar(game->board[j][i].getValue());
-          drawSymbol(game->board[j][i].getType());
-          for (size_t k = 0; k < 3; k++) {
-            cout << static_cast<char>(mark(j, i + 1));
-          }
-          cout << static_cast<char>(186);
-        } else {
-          if (i - 2 < game->board[j].size()) {
-            endDrawing = false;
-            cout << static_cast<char>(186) << "         " << static_cast<char>(186);
-          }else{
+        if (game->board[j].size() == 0) {
+          if (i == 1 || i == 0 || i == 2) {
+            draw_card_body(j, 1);
+          } else {
             cout << "           ";
+          }
+        } else {
+          if (game->board[j].size() > i) {
+            endDrawing = false;
+            cout << static_cast<char>(186);
+            for (size_t k = 0; k < 3; k++) {
+              cout << static_cast<char>(mark(j, i + 1));
+            }
+            if (game->board[j][i].getValue() == 10)
+              cout << setw(2) << 10;
+            else
+              cout << setw(2) << getValueChar(game->board[j][i].getValue());
+            drawSymbol(game->board[j][i].getType());
+            for (size_t k = 0; k < 3; k++) {
+              cout << static_cast<char>(mark(j, i + 1));
+            }
+            cout << static_cast<char>(186);
+          } else {
+            if (i - 2 < game->board[j].size()) {
+              endDrawing = false;
+              cout << static_cast<char>(186) << "         " << static_cast<char>(186);
+            }else{
+              cout << "           ";
+            }
           }
         }
       }
