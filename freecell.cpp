@@ -70,13 +70,13 @@ private:
 			}
 			if(cursor_x >= 4) { //sth->target cases
 				if((cursor_marked_x < 4) && (cursor_marked_y == 0)) { //aux->target case
-					if(((target[cursor_x - 4].getValue() == 0) && (aux[cursor_marked_x].getValue() == 1)) || ((target[cursor_x - 4].getValue() == (aux[cursor_marked_x].getValue() - 1)) && (target[cursor_x - 4].getType() == aux[cursor_marked_x].getType()))) { //what the fuck?
+					if(((target[cursor_x - 4].getValue() == 0) && (aux[cursor_marked_x].getValue() == 1)) || ((target[cursor_x - 4].getValue() == (aux[cursor_marked_x].getValue() - 1)) && (target[cursor_x - 4].getType() == aux[cursor_marked_x].getType()))) { //what?
 						target[cursor_x - 4] = aux[cursor_marked_x];
 						aux[cursor_marked_x].setValue(0);
 					} //else message NOT POSSIBLE
 				}
 				if(cursor_marked_y > 0) { //board->target case
-					if(((board[cursor_marked_x].size() == cursor_marked_y) && (board[cursor_marked_x].size() != 0)) && (((target[cursor_x - 4].getValue() == 0) && (board[cursor_marked_x][cursor_marked_y - 1].getValue() == 1)) || ((target[cursor_x - 4].getValue() == (board[cursor_marked_x][cursor_marked_y - 1].getValue() - 1)) && (target[cursor_x - 4].getType() == board[cursor_marked_x][cursor_marked_y - 1].getType())))) { //whaaat the fuck?
+					if(((board[cursor_marked_x].size() == cursor_marked_y) && (board[cursor_marked_x].size() != 0)) && (((target[cursor_x - 4].getValue() == 0) && (board[cursor_marked_x][cursor_marked_y - 1].getValue() == 1)) || ((target[cursor_x - 4].getValue() == (board[cursor_marked_x][cursor_marked_y - 1].getValue() - 1)) && (target[cursor_x - 4].getType() == board[cursor_marked_x][cursor_marked_y - 1].getType())))) { //whaaat?!
 						target[cursor_x - 4] = board[cursor_marked_x][cursor_marked_y - 1];
 						board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);
 					} //else message NOT POSSIBLE				
@@ -91,9 +91,9 @@ private:
 				}
 			}
 			if(cursor_marked_y > 0) { //board->board case
-				if((board[cursor_x].size() == 0) || (board[cursor_x].size() == cursor_y)) { //has to be put on top or empty
-					if((board[cursor_x].size() == 0) || (board[cursor_x][cursor_y - 1].getValue() == (board[cursor_marked_x][cursor_marked_y - 1].getValue() + 1)) && (board[cursor_x][cursor_y - 1].getColor() != (board[cursor_marked_x][cursor_marked_y - 1].getColor()))) {
-						if(isInOrder(cursor_marked_x, cursor_marked_y - 1, board[cursor_marked_x].size() - 1) && (countFreeCells() >= (board[cursor_marked_x].size() - cursor_marked_y))) {
+				if(board[cursor_x].empty() || (board[cursor_x].size() == cursor_y)) { //has to be put on top or empty
+					if(board[cursor_x].empty() || ((board[cursor_x][cursor_y - 1].getValue() == (board[cursor_marked_x][cursor_marked_y - 1].getValue() + 1)) && (board[cursor_x][cursor_y - 1].getColor() != (board[cursor_marked_x][cursor_marked_y - 1].getColor())))) {
+						if(isInOrder(cursor_marked_x, cursor_marked_y, board[cursor_marked_x].size() - 1) && ((board[cursor_x].empty()?(countFreeCells() - 1):countFreeCells()) >= (board[cursor_marked_x].size() - cursor_marked_y))) {
 							for(size_t i = cursor_marked_y - 1, initial_size = board[cursor_marked_x].size(); i < initial_size; i++) {
 								board[cursor_x].push_back(board[cursor_marked_x][cursor_marked_y - 1]);
 								board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);	
@@ -114,13 +114,13 @@ public:
   	vector<card_t> board[8];
   	card_t target[4];
   	card_t aux[4];
-	
+  	
 	bool isInOrder(unsigned short which, unsigned short from, unsigned short to) {
-		if((from == to) || (to == from + 1)) 
+		if(from >= to) 
 			return true;
 		for(size_t i = from; i < to; i++) {
-			if((board[which][i].getValue() != (board[which][i+1].getValue() - 1)) && (board[which][i].getType() == board[which][i+1].getType())) {
-				return false;
+			if((board[which][i].getValue() != (board[which][i + 1].getValue() + 1)) || (board[which][i].getColor() == board[which][i + 1].getColor())) {
+				return false; //--------------------------------------------^^^^^ - wrong sign here made me play this game for 4 hours, searchin' the bug...
 			}
 			return true;
 		}	
@@ -133,9 +133,11 @@ public:
 		}
 		vector<card_t> cards_buffer;
     	card_t example_card;
-    	for (size_t i = 0; i < 4; i++) { //fill cards_buffer linearly
+    	for (size_t i = 0; i < 4; i++) 
+		{ //fill cards_buffer linearly
       		example_card.setType(static_cast<CARDS>(i+1));
-      		for(size_t j = 0; j < 13; j++) {
+      		for(size_t j = 0; j < 13; j++) 
+			{
       			example_card.setValue(j+1);
       			cards_buffer.push_back(example_card);
 			}
@@ -143,23 +145,16 @@ public:
     	srand(time(NULL));
     	for(size_t i = 0; i < 4; i++) { //randomize for first 4 stacks
     		for(size_t j = 0; j < 7; j++) {
-    			unsigned short random_card = (rand() % (cards_buffer.size() - 1));
+    			unsigned short random_card = (rand() % cards_buffer.size());
 				board[i].push_back(cards_buffer[random_card]);
 				cards_buffer.erase(cards_buffer.begin() + random_card);
 			}
 		}
 		for(size_t i = 4; i < 8; i++) { //randomize for last 4 stacks
     		for(size_t j = 0; j < 6; j++) {
-    			unsigned short random_card;
-    			if(cards_buffer.size() > 1) {
-    				 random_card = (rand() % (cards_buffer.size() - 1));
-    			}
-    			else {
-    				random_card == 0;
-				}
+    			unsigned short random_card = (rand() % cards_buffer.size());
     			board[i].push_back(cards_buffer[random_card]);
 				cards_buffer.erase(cards_buffer.begin() + random_card);
-				cout<<random_card<<endl;
 			}
 		}
 	}
@@ -167,7 +162,7 @@ public:
   bool checkIfWin() {
   	bool won = true;
   	for(size_t i = 0; i < 8; i++) {
-  		won = isInOrder(i, 0, board[i].size()) && won;
+  		won = isInOrder(i, 0, board[i].size() - 1) && won;
 	  }
 	  return won || (target[0].getValue() == 13 && target[1].getValue() == 13 && target[2].getValue() == 13 && target[3].getValue() == 13);
 	}
@@ -219,7 +214,6 @@ public:
 				else if(cursor_marked && (cursor_x != cursor_marked_x || cursor_y != cursor_marked_y)) {
         			makeMove();
         			if(checkIfWin() == true) {
-        				system("CLS");
         				cout<<"YOU WON!!!"<<endl;
         				system("PAUSE");
         				exit(0);
