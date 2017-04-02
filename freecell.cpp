@@ -5,6 +5,9 @@
 #include <vector>
 #include <ctime>
 
+// 0, 1
+#define DRAWING_MODE 0
+
 using namespace std;
 
 enum CARDS {
@@ -269,30 +272,66 @@ private:
 
   void drawSymbol (CARDS card) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    #if DRAWING_MODE
+
     SetConsoleOutputCP(850);
     switch (card) {
       case KIER:
         SetConsoleTextAttribute(hConsole, 12);
-        // cout << static_cast<char>(3);
-        cout << 'H';
+        cout << static_cast<char>(3);
+        // cout << 'H';
         SetConsoleTextAttribute(hConsole, 15);
         break;
       case KARO:
         SetConsoleTextAttribute(hConsole, 12);
-        //  cout << static_cast<char>(4);
-        cout << 'D';
+        cout << static_cast<char>(4);
+        // cout << 'D';
         SetConsoleTextAttribute(hConsole, 15);
         break;
       case PIK:
-         //  cout << static_cast<char>(5);
-         cout << 'S';
+        cout << static_cast<char>(5);
+        //  cout << 'S';
         break;
       case TREFL:
-         //  cout << static_cast<char>(6);
-         cout << 'C';
+        cout << static_cast<char>(6);
+        //  cout << 'C';
         break;
     }
     SetConsoleOutputCP(852);
+
+    #else
+
+
+    SetConsoleOutputCP(CP_UTF8);
+    wchar_t s[2];
+
+    switch (card) {
+      case KIER:
+        s[0] = L'♥';
+        break;
+      case KARO:
+        s[0] = L'♦';
+        break;
+      case PIK:
+        s[0] = L'♠';
+        break;
+      case TREFL:
+        s[0] = L'♣';
+        break;
+    }
+
+    s[1] = '\0';
+    int bufferSize = WideCharToMultiByte(CP_UTF8, 0, s, -1, NULL, 0, NULL, NULL);
+    char* m = new char[bufferSize];
+    WideCharToMultiByte(CP_UTF8, 0, s, -1, m, bufferSize, NULL, NULL);
+    if (card == KIER || card == KARO)
+      SetConsoleTextAttribute(hConsole, 12);
+    wprintf(L"%S", m);
+    SetConsoleTextAttribute(hConsole, 15);
+    SetConsoleOutputCP(852);
+
+    #endif
   }
 
 
