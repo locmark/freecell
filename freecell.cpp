@@ -14,15 +14,19 @@ enum CARDS {
   	TREFL
 };
 
+
 enum COLORS {
 	BLACK = false,
   	RED = true
 };
 
+
 class card_t {
+
 private:
 	CARDS type;
   	unsigned short int value;
+
 public:
   	bool getColor () {return type <= 2;}
   	CARDS getType () {return type;}
@@ -35,6 +39,7 @@ public:
     	value = _value;
   	}
 };
+
 
 class game_t {
 private:
@@ -52,58 +57,61 @@ private:
 		}
 		return count;
 	}
+
+
 	void makeMove () {
-		if(cursor_y == 0) { //sth->aux or sth->target cases DONE
-			if (cursor_x < 4) { //sth->aux cases 
-				if((cursor_marked_x < 4) && (cursor_marked_y == 0)) { //aux->aux case
-					if(aux[cursor_x].getValue() == 0) {
+		if (cursor_y == 0) { //sth->aux or sth->target cases DONE
+			if (cursor_x < 4) { //sth->aux cases
+				if ((cursor_marked_x < 4) && (cursor_marked_y == 0)) { //aux->aux case
+					if (aux[cursor_x].getValue() == 0) {
 						aux[cursor_x] = aux[cursor_marked_x];
 						aux[cursor_marked_x].setValue(0);
-					} //else message NOT FREE	
+					} //else message NOT FREE
 				}
-				if(cursor_marked_y > 0) { //board->aux case 
-					if((aux[cursor_x].getValue() == 0) && (board[cursor_marked_x].size() != 0) && (board[cursor_marked_x].size() == cursor_marked_y)) {
+				if (cursor_marked_y > 0) { //board->aux case
+					if ((aux[cursor_x].getValue() == 0) && (board[cursor_marked_x].size() != 0) && (board[cursor_marked_x].size() == cursor_marked_y)) {
 						aux[cursor_x] = board[cursor_marked_x][cursor_marked_y - 1];
 						board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);
-					} //else message NOT FREE				
-				}	
+					} //else message NOT FREE
+				}
 			}
-			if(cursor_x >= 4) { //sth->target cases
-				if((cursor_marked_x < 4) && (cursor_marked_y == 0)) { //aux->target case
-					if(((target[cursor_x - 4].getValue() == 0) && (aux[cursor_marked_x].getValue() == 1)) || ((target[cursor_x - 4].getValue() == (aux[cursor_marked_x].getValue() - 1)) && (target[cursor_x - 4].getType() == aux[cursor_marked_x].getType()))) { //what?
+			if (cursor_x >= 4) { //sth->target cases
+				if ((cursor_marked_x < 4) && (cursor_marked_y == 0)) { //aux->target case
+					if (((target[cursor_x - 4].getValue() == 0) && (aux[cursor_marked_x].getValue() == 1)) || ((target[cursor_x - 4].getValue() == (aux[cursor_marked_x].getValue() - 1)) && (target[cursor_x - 4].getType() == aux[cursor_marked_x].getType()))) { //what?
 						target[cursor_x - 4] = aux[cursor_marked_x];
 						aux[cursor_marked_x].setValue(0);
 					} //else message NOT POSSIBLE
 				}
-				if(cursor_marked_y > 0) { //board->target case
-					if(((board[cursor_marked_x].size() == cursor_marked_y) && (board[cursor_marked_x].size() != 0)) && (((target[cursor_x - 4].getValue() == 0) && (board[cursor_marked_x][cursor_marked_y - 1].getValue() == 1)) || ((target[cursor_x - 4].getValue() == (board[cursor_marked_x][cursor_marked_y - 1].getValue() - 1)) && (target[cursor_x - 4].getType() == board[cursor_marked_x][cursor_marked_y - 1].getType())))) { //whaaat?!
+				if (cursor_marked_y > 0) { //board->target case
+					if (((board[cursor_marked_x].size() == cursor_marked_y) && (board[cursor_marked_x].size() != 0)) && (((target[cursor_x - 4].getValue() == 0) && (board[cursor_marked_x][cursor_marked_y - 1].getValue() == 1)) || ((target[cursor_x - 4].getValue() == (board[cursor_marked_x][cursor_marked_y - 1].getValue() - 1)) && (target[cursor_x - 4].getType() == board[cursor_marked_x][cursor_marked_y - 1].getType())))) { //whaaat?!
 						target[cursor_x - 4] = board[cursor_marked_x][cursor_marked_y - 1];
 						board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);
-					} //else message NOT POSSIBLE				
+					} //else message NOT POSSIBLE
 				}
 			}
 		}
-		if(cursor_y > 0) { //aux->board or board->board cases
-			if((cursor_marked_x < 4) && (cursor_marked_y == 0)) { //aux->board case
-				if((board[cursor_x].size() == 0) || (board[cursor_x][cursor_y - 1].getValue() == (aux[cursor_marked_x].getValue() + 1)) && (board[cursor_x][cursor_y - 1].getColor() != aux[cursor_marked_x].getColor())) {
+		if (cursor_y > 0) { //aux->board or board->board cases
+			if ((cursor_marked_x < 4) && (cursor_marked_y == 0)) { //aux->board case
+				if ((board[cursor_x].size() == 0) || (board[cursor_x][cursor_y - 1].getValue() == (aux[cursor_marked_x].getValue() + 1)) && (board[cursor_x][cursor_y - 1].getColor() != aux[cursor_marked_x].getColor())) {
 					board[cursor_x].push_back(aux[cursor_marked_x]);
 					aux[cursor_marked_x].setValue(0);
 				}
 			}
-			if(cursor_marked_y > 0) { //board->board case
-				if(board[cursor_x].empty() || (board[cursor_x].size() == cursor_y)) { //has to be put on top or empty
-					if(board[cursor_x].empty() || ((board[cursor_x][cursor_y - 1].getValue() == (board[cursor_marked_x][cursor_marked_y - 1].getValue() + 1)) && (board[cursor_x][cursor_y - 1].getColor() != (board[cursor_marked_x][cursor_marked_y - 1].getColor())))) {
-						if(isInOrder(cursor_marked_x, cursor_marked_y, board[cursor_marked_x].size() - 1) && ((board[cursor_x].empty()?(countFreeCells() - 1):countFreeCells()) >= (board[cursor_marked_x].size() - cursor_marked_y))) {
-							for(size_t i = cursor_marked_y - 1, initial_size = board[cursor_marked_x].size(); i < initial_size; i++) {
+			if (cursor_marked_y > 0) { //board->board case
+				if (board[cursor_x].empty() || (board[cursor_x].size() == cursor_y)) { //has to be put on top or empty
+					if (board[cursor_x].empty() || ((board[cursor_x][cursor_y - 1].getValue() == (board[cursor_marked_x][cursor_marked_y - 1].getValue() + 1)) && (board[cursor_x][cursor_y - 1].getColor() != (board[cursor_marked_x][cursor_marked_y - 1].getColor())))) {
+						if (isInOrder(cursor_marked_x, cursor_marked_y, board[cursor_marked_x].size() - 1) && ((board[cursor_x].empty()?(countFreeCells() - 1):countFreeCells()) >= (board[cursor_marked_x].size() - cursor_marked_y))) {
+							for (size_t i = cursor_marked_y - 1, initial_size = board[cursor_marked_x].size(); i < initial_size; i++) {
 								board[cursor_x].push_back(board[cursor_marked_x][cursor_marked_y - 1]);
-								board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);	
+								board[cursor_marked_x].erase(board[cursor_marked_x].begin() + cursor_marked_y - 1);
 							}
 						}
 					}
 				}
-			}	
-		}			
-  	}	
+			}
+		}
+  	}
+
 public:
 	unsigned short int cursor_x = 0;
   	unsigned short int cursor_y = 0;
@@ -114,18 +122,20 @@ public:
   	vector<card_t> board[8];
   	card_t target[4];
   	card_t aux[4];
-  	
+
+
 	bool isInOrder(unsigned short which, unsigned short from, unsigned short to) {
-		if(from >= to) 
+		if (from >= to)
 			return true;
-		for(size_t i = from; i < to; i++) {
-			if((board[which][i].getValue() != (board[which][i + 1].getValue() + 1)) || (board[which][i].getColor() == board[which][i + 1].getColor())) {
-				return false; //--------------------------------------------^^^^^ - wrong sign here made me play this game for 4 hours, searchin' the bug...
+		for (size_t i = from; i < to; i++) {
+			if ((board[which][i].getValue() != (board[which][i + 1].getValue() + 1)) || (board[which][i].getColor() == board[which][i + 1].getColor())) {
+				return false;
 			}
 			return true;
-		}	
+		}
 	}
-	
+
+
 	void createBoard() {
 		for(size_t i = 0; i < 4; i++) { //clear cells
   			target[i].setValue(0);
@@ -133,40 +143,40 @@ public:
 		}
 		vector<card_t> cards_buffer;
     	card_t example_card;
-    	for (size_t i = 0; i < 4; i++) 
-		{ //fill cards_buffer linearly
+    	for (size_t i = 0; i < 4; i++) { //fill cards_buffer linearly
       		example_card.setType(static_cast<CARDS>(i+1));
-      		for(size_t j = 0; j < 13; j++) 
-			{
+      		for(size_t j = 0; j < 13; j++) {
       			example_card.setValue(j+1);
       			cards_buffer.push_back(example_card);
-			}
+    			}
     	}
     	srand(time(NULL));
     	for(size_t i = 0; i < 4; i++) { //randomize for first 4 stacks
     		for(size_t j = 0; j < 7; j++) {
     			unsigned short random_card = (rand() % cards_buffer.size());
-				board[i].push_back(cards_buffer[random_card]);
-				cards_buffer.erase(cards_buffer.begin() + random_card);
-			}
-		}
-		for(size_t i = 4; i < 8; i++) { //randomize for last 4 stacks
-    		for(size_t j = 0; j < 6; j++) {
-    			unsigned short random_card = (rand() % cards_buffer.size());
-    			board[i].push_back(cards_buffer[random_card]);
-				cards_buffer.erase(cards_buffer.begin() + random_card);
-			}
-		}
-	}
-	
+  				board[i].push_back(cards_buffer[random_card]);
+  				cards_buffer.erase(cards_buffer.begin() + random_card);
+  			}
+  		}
+  		for(size_t i = 4; i < 8; i++) { //randomize for last 4 stacks
+      		for(size_t j = 0; j < 6; j++) {
+      			unsigned short random_card = (rand() % cards_buffer.size());
+      			board[i].push_back(cards_buffer[random_card]);
+  				cards_buffer.erase(cards_buffer.begin() + random_card);
+  			}
+  		}
+    }
+
+
   bool checkIfWin() {
   	bool won = true;
-  	for(size_t i = 0; i < 8; i++) {
+  	for (size_t i = 0; i < 8; i++) {
   		won = isInOrder(i, 0, board[i].size() - 1) && won;
 	  }
 	  return won || (target[0].getValue() == 13 && target[1].getValue() == 13 && target[2].getValue() == 13 && target[3].getValue() == 13);
 	}
-	
+
+
 	void loop () {
     	switch (getch()) {
       		case 'w':
@@ -181,47 +191,43 @@ public:
         	break;
       		case 'a':
         		if (cursor_x > 0) {
-          			if (cursor_y != 0 && cursor_y > board[cursor_x - 1].size()) {
-            			if (board[cursor_x - 1].size() == 0) {
-              				cursor_y = 1;
-            			} 
-						else {
-              				cursor_y = board[cursor_x - 1].size();
-            			}
+        			if (cursor_y != 0 && cursor_y > board[cursor_x - 1].size()) {
+          			if (board[cursor_x - 1].size() == 0) {
+            				cursor_y = 1;
+          			} else {
+            				cursor_y = board[cursor_x - 1].size();
           			}
-          			cursor_x--;
+        			}
+        			cursor_x--;
         		}
         	break;
       		case 'd':
         		if (cursor_x < 7) {
-          			if (cursor_y != 0 && cursor_y > board[cursor_x + 1].size()) {
-            			if (board[cursor_x + 1].size() == 0) {
-              				cursor_y = 1;
-           				} 
-						else {
+        			if (cursor_y != 0 && cursor_y > board[cursor_x + 1].size()) {
+          			if (board[cursor_x + 1].size() == 0) {
+            				cursor_y = 1;
+         				} else {
               				cursor_y = board[cursor_x + 1].size();
-            			}
           			}
-          			cursor_x++;
+        			}
+        			cursor_x++;
         		}
         	break;
       		case ' ':
         		if (!cursor_marked) {
-					cursor_marked = true;
-          			cursor_marked_x = cursor_x;
-          			cursor_marked_y = cursor_y;
-        		} 
-				else if(cursor_marked && (cursor_x != cursor_marked_x || cursor_y != cursor_marked_y)) {
+    					cursor_marked = true;
+        			cursor_marked_x = cursor_x;
+        			cursor_marked_y = cursor_y;
+        		} else if(cursor_marked && (cursor_x != cursor_marked_x || cursor_y != cursor_marked_y)) {
         			makeMove();
         			if(checkIfWin() == true) {
         				cout<<"YOU WON!!!"<<endl;
         				system("PAUSE");
         				exit(0);
-					}
+    					}
         			cursor_marked = false;
-    	  		} 
-		  		else if (cursor_marked && cursor_x == cursor_marked_x && cursor_y == cursor_marked_y) {
-          			cursor_marked = false;
+    	  		} else if (cursor_marked && cursor_x == cursor_marked_x && cursor_y == cursor_marked_y) {
+        			cursor_marked = false;
         		}
         	break;
     	}
@@ -232,6 +238,7 @@ public:
 class graphics_t {
 private:
 	game_t* game;
+
 	char mark (unsigned short int x, unsigned short int y) {
     	unsigned short int pos_x = game->cursor_x;
     	unsigned short int pos_y = game->cursor_y;
@@ -243,39 +250,46 @@ private:
       		if (marked) {
         		if (pos_x == pos_x_marked && pos_y == pos_y_marked) {
           			return static_cast<char>(178);
-        		} 
-				else {
+        		} else {
           			return static_cast<char>(176);
         		}
       		}
 			else {
         		return static_cast<char>(176);
       		}
-    	} 
-		else {
-      		if (marked && x == pos_x_marked && y == pos_y_marked) {
-        		return static_cast<char>(177);
-      		} 
-	  		else {
-        		return ' ';
-      		}
+    	} else {
+    		if (marked && x == pos_x_marked && y == pos_y_marked) {
+      		return static_cast<char>(177);
+    		} else {
+      		return ' ';
+    		}
     	}
   	}
 
+
   void drawSymbol (CARDS card) {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleOutputCP(850);
     switch (card) {
       case KIER:
-        cout<<static_cast<char>(3);
+        SetConsoleTextAttribute(hConsole, 12);
+        // cout << static_cast<char>(3);
+        cout << 'H';
+        SetConsoleTextAttribute(hConsole, 15);
         break;
       case KARO:
-         cout<<static_cast<char>(4);
+        SetConsoleTextAttribute(hConsole, 12);
+        //  cout << static_cast<char>(4);
+        cout << 'D';
+        SetConsoleTextAttribute(hConsole, 15);
         break;
       case PIK:
-         cout<<static_cast<char>(5);
+         //  cout << static_cast<char>(5);
+         cout << 'S';
         break;
       case TREFL:
-         cout<<static_cast<char>(6);
+         //  cout << static_cast<char>(6);
+         cout << 'C';
         break;
     }
     SetConsoleOutputCP(852);
@@ -428,7 +442,7 @@ public:
 
     GetWindowRect(console, &r); //stores the console's current dimensions
     MoveWindow(console, r.left, r.top, 800, 600, TRUE);
-    
+
     GetConsoleCursorInfo(out, &cursorInfo);
     cursorInfo.bVisible = false; // set the cursor visibility
     SetConsoleCursorInfo(out, &cursorInfo);
@@ -465,26 +479,14 @@ public:
         } else {
           if (game->board[j].size() > i) {
             endDrawing = false;
-            cout << static_cast<char>(201);
-            for (size_t k = 0; k < 9; k++) {
-              cout << static_cast<char>(205);
-            }
-            cout << static_cast<char>(187);
+            draw_card_top ();
           } else {
             if (i - 2 <= game->board[j].size()) {
               endDrawing = false;
               if (i - 2 < game->board[j].size()) {
-                cout << static_cast<char>(186);
-                for (size_t k = 0; k < 9; k++) {
-                  cout << mark(j, i);
-                }
-                cout << static_cast<char>(186);
+                draw_card_body (j, i);
               } else {
-                cout << static_cast<char>(200);
-                for (size_t k = 0; k < 9; k++) {
-                  cout << static_cast<char>(205);
-                }
-                cout << static_cast<char>(188);
+                draw_card_bottom ();
               }
             } else {
               cout << "           ";
@@ -534,7 +536,7 @@ int main(int argc, const char **argv) {
   	graphics.init(&game);
 
   	graphics.draw();
-  	
+
   	while (1) {
     	game.loop();
     	graphics.draw();
