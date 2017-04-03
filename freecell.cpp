@@ -6,21 +6,15 @@
 #include <ctime>
 
 // 0, 1
-#define DRAWING_MODE 0
+#define DRAWING_MODE 1
 
 using namespace std;
 
 enum CARDS {
-  	KIER = 1,
-  	KARO,
-  	PIK,
-  	TREFL
-};
-
-
-enum COLORS {
-	BLACK = false,
-  	RED = true
+  	HEART = 1,
+  	DIAMOND,
+  	SPADE,
+  	CLUB
 };
 
 
@@ -28,16 +22,16 @@ class card_t {
 
 private:
 	CARDS type;
-  	unsigned short int value;
+  	unsigned short value;
 
 public:
   	bool getColor () {return type <= 2;}
   	CARDS getType () {return type;}
-  	unsigned short int getValue () {return value;}
+  	unsigned short getValue () {return value;}
   	void setType (CARDS _type) {type = _type;}
-  	void setValue (unsigned short int _value) {value = _value;}
+  	void setValue (unsigned short _value) {value = _value;}
   	card_t () {}
-  	card_t (CARDS _type, unsigned short int _value) {
+  	card_t (CARDS _type, unsigned short _value) {
     	type = _type;
     	value = _value;
   	}
@@ -63,7 +57,7 @@ private:
 
 
 	void makeMove () {
-		if (cursor_y == 0) { //sth->aux or sth->target cases DONE
+		if (cursor_y == 0) { //sth->aux or sth->target cases
 			if (cursor_x < 4) { //sth->aux cases
 				if ((cursor_marked_x < 4) && (cursor_marked_y == 0)) { //aux->aux case
 					if (aux[cursor_x].getValue() == 0) {
@@ -116,10 +110,10 @@ private:
   	}
 
 public:
-	unsigned short int cursor_x = 0;
-  	unsigned short int cursor_y = 0;
-  	unsigned short int cursor_marked_x = 0;
-  	unsigned short int cursor_marked_y = 0;
+	unsigned short cursor_x = 0;
+  	unsigned short cursor_y = 0;
+  	unsigned short cursor_marked_x = 0;
+  	unsigned short cursor_marked_y = 0;
   	bool cursor_marked = false;
 
   	vector<card_t> board[8];
@@ -128,7 +122,7 @@ public:
 
 
 	bool isInOrder(unsigned short which, unsigned short from, unsigned short to) {
-		if (from >= to)
+		if ((from >= to) || (to == from + 1))
 			return true;
 		for (size_t i = from; i < to; i++) {
 			if ((board[which][i].getValue() != (board[which][i + 1].getValue() + 1)) || (board[which][i].getColor() == board[which][i + 1].getColor())) {
@@ -174,7 +168,7 @@ public:
   bool checkIfWin() {
   	bool won = true;
   	for (size_t i = 0; i < 8; i++) {
-  		won = isInOrder(i, 0, board[i].size() - 1) && won;
+  		won = isInOrder(i, 0, board[i].size()) && won;
 	  }
 	  return won || (target[0].getValue() == 13 && target[1].getValue() == 13 && target[2].getValue() == 13 && target[3].getValue() == 13);
 	}
@@ -242,11 +236,11 @@ class graphics_t {
 private:
 	game_t* game;
 
-	char mark (unsigned short int x, unsigned short int y) {
-    	unsigned short int pos_x = game->cursor_x;
-    	unsigned short int pos_y = game->cursor_y;
-    	unsigned short int pos_x_marked = game->cursor_marked_x;
-    	unsigned short int pos_y_marked = game->cursor_marked_y;
+	char mark (unsigned short x, unsigned short y) {
+    	unsigned short pos_x = game->cursor_x;
+    	unsigned short pos_y = game->cursor_y;
+    	unsigned short pos_x_marked = game->cursor_marked_x;
+    	unsigned short pos_y_marked = game->cursor_marked_y;
     	bool marked = game->cursor_marked;
 
     	if (x == pos_x && y == pos_y) {
@@ -277,23 +271,23 @@ private:
 
     SetConsoleOutputCP(850);
     switch (card) {
-      case KIER:
+      case HEART:
         SetConsoleTextAttribute(hConsole, 12);
         cout << static_cast<char>(3);
         // cout << 'H';
         SetConsoleTextAttribute(hConsole, 15);
         break;
-      case KARO:
+      case DIAMOND:
         SetConsoleTextAttribute(hConsole, 12);
         cout << static_cast<char>(4);
         // cout << 'D';
         SetConsoleTextAttribute(hConsole, 15);
         break;
-      case PIK:
+      case SPADE:
         cout << static_cast<char>(5);
         //  cout << 'S';
         break;
-      case TREFL:
+      case CLUB:
         cout << static_cast<char>(6);
         //  cout << 'C';
         break;
@@ -335,7 +329,7 @@ private:
   }
 
 
-  char getValueChar (unsigned short int value) {
+  char getValueChar (unsigned short value) {
     switch (value) {
       case 1:
         return 'A';
@@ -352,11 +346,11 @@ private:
 
 
   void goToStart() {
-    HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     COORD CursorPosition;
     CursorPosition.X = 0;
     CursorPosition.Y = 0;
-    SetConsoleCursorPosition(console, CursorPosition);
+    SetConsoleCursorPosition(hConsole, CursorPosition);
   }
 
 
@@ -378,7 +372,7 @@ private:
   }
 
 
-  void draw_card_body (unsigned short int x, unsigned short int y) {
+  void draw_card_body (unsigned short x, unsigned short y) {
     cout << static_cast<char>(186);
     for (size_t k = 0; k < 9; k++) {
       cout << mark(x, y);
@@ -387,7 +381,7 @@ private:
   }
 
 
-  void draw_card_content (unsigned short int x, unsigned short int y) {
+  void draw_card_content (unsigned short x, unsigned short y) {
     cout << static_cast<char>(186);
 
     if (y == 0) {
@@ -474,17 +468,18 @@ private:
 public:
   void init (game_t* _game) {
     game = _game;
-    HWND console = GetConsoleWindow();
-    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+    HWND wConsole = GetConsoleWindow();
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_CURSOR_INFO cursorInfo;
     RECT r;
 
-    GetWindowRect(console, &r); //stores the console's current dimensions
-    MoveWindow(console, r.left, r.top, 800, 600, TRUE);
+    GetWindowRect(wConsole, &r); //stores the console's current dimensions
+    MoveWindow(wConsole, r.left, r.top, 800, 600, TRUE);
 
-    GetConsoleCursorInfo(out, &cursorInfo);
+    GetConsoleCursorInfo(hConsole, &cursorInfo);
     cursorInfo.bVisible = false; // set the cursor visibility
-    SetConsoleCursorInfo(out, &cursorInfo);
+    SetConsoleCursorInfo(hConsole, &cursorInfo);
+    SetConsoleTextAttribute(hConsole, 15);
   }
 
 
